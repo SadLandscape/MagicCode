@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation2"
+    app:startDestination="@+id/notes">
+
+    <fragment
+        android:id="@+id/notes"
+        android:name="com.example.magic_code.ui.notes.NotesPage"
+        android:label="Notes"
+        tools:layout="@layout/notes" />
+
+    <fragment
+        android:id="@+id/scan"
+        android:name="com.example.magic_code.ui.scan.ScanPage"
+        android:label="Scan"
+        tools:layout="@layout/scan" />
+
+    <fragment
+        android:id="@+id/stories"
+        android:name="com.example.magic_code.ui.stories.StoriesPage"
+        android:label="Stories"
+        tools:layout="@layout/stories" />
+    <fragment
+        android:id="@+id/profile"
+        android:name="com.example.magic_code.ui.profile.ProfilePage"
+        android:label="Profile"
+        tools:layout="@layout/profile" />
+</navigation>

@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/notes"
+        android:enabled="true"
+        android:icon="@drawable/notes_24"
+        android:title="Notes" />
+    <item
+        android:id="@+id/scan"
+        android:enabled="true"
+        android:icon="@drawable/scanner_24"
+        android:title="Scan" />
+    <item
+        android:id="@+id/stories"
+        android:enabled="true"
+        android:icon="@drawable/book_24"
+        android:title="Stories" />
+    <item
+        android:id="@+id/profile"
+        android:enabled="true"
+        android:icon="@drawable/person_24"
+        android:title="Profile"/>
+</menu>
