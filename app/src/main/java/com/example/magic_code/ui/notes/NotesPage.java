@@ -49,34 +49,15 @@ public class NotesPage extends Fragment {
         CustomAdapter adapter = new CustomAdapter(dataset,getContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
-        ItemClickSupport.addTo(recyclerView).setOnItemClickListener((recyclerView1, position, v) -> Toast.makeText(getActivity(), "ID: "+v.getTag(), Toast.LENGTH_SHORT).show());
-        recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+        ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
-            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-                if (e.getAction() == MotionEvent.ACTION_UP) {
-                    View childView = rv.findChildViewUnder(e.getX(), e.getY());
-                    assert childView != null;
-                    int position = rv.getChildAdapterPosition(childView);
-                    if (position != RecyclerView.NO_POSITION) {
-                        Note clickedNote = new Note(dataset.get(position));
-                        NoteFragment detailFragment = NoteFragment.newInstance(clickedNote.getId());
-                        FragmentTransaction transaction = Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction();
-                        transaction.replace(R.id.nav_host_fragment_activity_main, detailFragment);
-                        transaction.addToBackStack(null);
-                        transaction.commit();
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
+            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                Note clickedNote = new Note(dataset.get(position));
+                NoteFragment detailFragment = NoteFragment.newInstance(clickedNote.getId());
+                FragmentTransaction transaction = Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.nav_host_fragment_activity_main, detailFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
