@@ -2,6 +2,7 @@ package com.example.magic_code.utils;
 
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +17,7 @@ public class HtmlUtils {
             matcher.appendReplacement(sb, String.valueOf(ch));
         }
         matcher.appendTail(sb);
+        Log.d("DECODER", "decodeHtml: "+sb);
         return sb.toString();
     }
 }

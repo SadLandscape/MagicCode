@@ -19,31 +19,38 @@ public class TextFormatter {
         return text.replaceAll("\"","");
     }
     public static String formatTextWithHtml(String text,Boolean editable) {
+        text = text.replaceAll("<br>","\n");
+
         text = CODE_PATTERN.matcher(text).replaceAll("<pre><code>$1</code></pre>");
 
         text = BOLD_PATTERN.matcher(text).replaceAll("<b>$1</b>");
 
         text = ITALIC_PATTERN.matcher(text).replaceAll("<i>$1</i>");
 
-        return ("<html><head><style type=\"text/css\">* {padding:0px; margin:0px;}</style></head><body contentEditable=\""+editable+"\" style=\"background-color: transparent;\">"+text.replaceAll("\"","")+"</body></html>");
+        text = text.replaceAll("\n","<br>");
+
+        return ("<html><head><style type=\"text/css\">* {padding:0px; margin:0px;}</style></head><body contentEditable=\""+editable+"\" style=\"background-color: transparent;\">"+text+"</body></html>");
     }
 
     public static String convertToRawText(String text) {
+        text = text.replaceAll("<br>","\n");
+
         text = text.replaceAll("<pre><code>(.*?)</code></pre>", "```$1```");
 
         text = text.replaceAll("<b>(.*?)</b>", "*$1*");
 
         text = text.replaceAll("<i>(.*?)</i>", "_$1_");
 
-        return text.replaceAll("\"","");
+        return text.replaceAll("^\"|\"$", "");
     }
     public static String convertToRawTextWithHtml(String text,Boolean editable) {
+        text = text.replaceAll("<br>","\n");
         text = text.replaceAll("<pre><code>(.*?)</code></pre>", "```$1```");
 
         text = text.replaceAll("<b>(.*?)</b>", "*$1*");
 
         text = text.replaceAll("<i>(.*?)</i>", "_$1_");
-
+        text = text.replaceAll("\n","<br>");
         return ("<html><head><style type=\"text/css\">* {padding:0px; margin:0px;}</style></head><body contentEditable=\""+editable+"\" style=\"background-color: transparent;\">"+text.replaceAll("\"","")+"</body></html>");
     }
 }
