@@ -8,6 +8,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,7 +45,8 @@ public class NotesPage extends Fragment {
             HashMap<String, Object> data = new HashMap<>();
             data.put("Title", "Title" + i);
             data.put("Author", "Author");
-            data.put("ID","id_"+i);
+            data.put("ID","40880f57-8655-487a-b31a-fda5123c442c");
+            data.put("ShareToken","40880f57-8655-487a-b31a-fda5123c442c");
             dataset.add(data);
         }
         CustomAdapter adapter = new CustomAdapter(dataset,getContext());
@@ -54,10 +57,8 @@ public class NotesPage extends Fragment {
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                 Note clickedNote = new Note(dataset.get(position));
                 NoteFragment detailFragment = NoteFragment.newInstance(clickedNote.getId());
-                FragmentTransaction transaction = Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.nav_host_fragment_activity_main, detailFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                NavController navController = Navigation.findNavController(requireView());
+                navController.navigate(R.id.action_notes_to_detailed_note_view,detailFragment.getArguments());
             }
         });
 

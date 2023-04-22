@@ -13,7 +13,8 @@ public class API {
             HashMap<String,Object> exampleNote = new HashMap<String, Object>(){{
                 put("Title","Title here");
                 put("Author","Author here");
-                put("ID",id);
+                put("ID","40880f57-8655-487a-b31a-fda5123c442c");
+                put("ShareToken","40880f57-8655-487a-b31a-fda5123c442c");
                 put("Text","*bold* _italic_ ```raw text```");
             }};
             return new Note(exampleNote);
