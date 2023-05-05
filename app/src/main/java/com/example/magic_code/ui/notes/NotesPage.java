@@ -1,6 +1,5 @@
 package com.example.magic_code.ui.notes;
 
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -14,12 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.example.magic_code.CustomAdapter;
+import com.example.magic_code.classes.CustomAdapter;
 import com.example.magic_code.R;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.ui.noteView.NoteFragment;
@@ -27,7 +24,6 @@ import com.example.magic_code.utils.ItemClickSupport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class NotesPage extends Fragment {
 
