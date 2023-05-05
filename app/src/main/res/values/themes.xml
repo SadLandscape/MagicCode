@@ -15,7 +15,17 @@
         <item name="overlapAnchor">false</item>
         <item name="android:actionOverflowButtonStyle">@style/MyOverflowButtonStyle</item>
     </style>
+
     <style name="MyOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">
         <item name="android:tint">#FFFFFF</item>
     </style>
+
+    <style name="Theme.MagicCode.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.MagicCode.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.MagicCode.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

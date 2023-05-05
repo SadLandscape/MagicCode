@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
@@ -67,6 +68,7 @@ public class NoteSettings extends Fragment {
             public void onClick(View view) {
                 API.Notes.updateSettings(settings);
                 Navigation.findNavController(requireView()).navigateUp();
+                Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
             }
         });
         return view;

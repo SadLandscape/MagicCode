@@ -9,6 +9,9 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.ui.AppBarConfiguration;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -20,9 +23,16 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
     BottomNavigationView navbar;
     private ActivityMainBinding binding;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPreferences = getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
+        if (sharedPreferences.getString("authToken","").equals("")){
+            Intent intent = new Intent(this,AuthenticationActivity.class);
+            startActivityForResult(intent,128);
+        }
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         navbar = findViewById(R.id.bottom_navigation);
