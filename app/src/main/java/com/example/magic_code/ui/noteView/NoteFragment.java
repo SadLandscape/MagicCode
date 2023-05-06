@@ -91,7 +91,7 @@ public class NoteFragment extends Fragment {
                 }
                 final Dialog dialog = new Dialog(getActivity());
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.qr_code_dialog);
+                dialog.setContentView(R.layout.dialog_qr_code);
                 ImageView imageView = dialog.findViewById(R.id.image_view_qr_code);
                 WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
                 lp.copyFrom(dialog.getWindow().getAttributes());
@@ -165,6 +165,9 @@ public class NoteFragment extends Fragment {
             noteText = note.getText();
         }
         noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
+        noteDescription.setFocusable(false);
+        noteDescription.setFocusableInTouchMode(false);
+        noteDescription.setClickable(false);
         return root_view;
     }
 

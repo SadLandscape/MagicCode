@@ -72,10 +72,10 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             } else {
-                Toast.makeText(this, "Please enable permissions!"+grantResults[0], Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please enable permissions!", Toast.LENGTH_SHORT).show();
             }
         }
     }

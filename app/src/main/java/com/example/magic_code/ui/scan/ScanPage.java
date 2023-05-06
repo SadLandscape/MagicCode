@@ -69,6 +69,9 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == 66){
+            if (data == null){
+                return;
+            }
             Uri imageUri = data.getData();
             Bitmap bitmap = null;
             try {
