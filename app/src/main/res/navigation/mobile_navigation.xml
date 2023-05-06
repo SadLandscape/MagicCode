@@ -21,7 +21,11 @@
     <fragment
         android:label="Profile"
         android:name="com.example.magic_code.ui.profile.ProfilePage"
-        android:id="@+id/profile" />
+        android:id="@+id/profile" >
+        <action
+            android:id="@+id/action_profile_to_profile_settings"
+            app:destination="@id/profile_settings" />
+    </fragment>
     <fragment
         android:name="com.example.magic_code.ui.noteView.NoteFragment"
         android:id="@+id/detailed_note_view" >
@@ -33,4 +37,8 @@
         android:label="Note Settings"
         android:name="com.example.magic_code.ui.noteSettings.NoteSettings"
         android:id="@+id/fragment_note_settings" />
+    <fragment
+        android:label="Profile Settings"
+        android:name="com.example.magic_code.ui.profileSettings.ProfileSettings"
+        android:id="@+id/profile_settings" />
 </navigation>

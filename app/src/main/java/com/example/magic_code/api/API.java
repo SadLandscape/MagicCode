@@ -1,4 +1,5 @@
 package com.example.magic_code.api;
+import com.example.magic_code.classes.AuthenticatedUser;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.models.Settings;
 import com.example.magic_code.models.User;
@@ -8,9 +9,31 @@ import java.util.HashMap;
 import java.util.List;
 
 public class API {
-//    public static class Authentication {
-//
-//    }
+    public static class Authentication {
+        public static String login(String email,String password){
+            return "okadpawdawoidadwoi";
+        }
+        public static  String register(String username,String email,String password){
+            return "okadpawdawoidadwoi";
+        }
+        public static boolean checkAuth(String authToken){
+            return !authToken.equals("");
+        }
+        public static List<Note> getNotes(String authToken){
+            List<Note> exampleNotes = new ArrayList<>();
+            for (int i=0;i<100;i++){
+                exampleNotes.add(Notes.getNote("note_"+i));
+            }
+            return exampleNotes;
+        }
+        public static AuthenticatedUser getUser(String authToken){
+            HashMap<String,Object> exampleUser = new HashMap<>();
+            exampleUser.put("Username","Example Username");
+            exampleUser.put("Email","example@gmail.com");
+            exampleUser.put("Notes",getNotes(authToken));
+            return new AuthenticatedUser(exampleUser);
+        }
+    }
 
     public static class Notes {
         public static Note getNote(String id) {
