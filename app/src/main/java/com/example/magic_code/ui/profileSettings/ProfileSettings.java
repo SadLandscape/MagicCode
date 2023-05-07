@@ -53,20 +53,12 @@ public class ProfileSettings extends Fragment {
 
                 EditText currentPasswordEditText = dialog.findViewById(R.id.current_password_edittext);
                 EditText newPasswordEditText = dialog.findViewById(R.id.new_password_edittext);
-                Button cancelButton = dialog.findViewById(R.id.cancel_button);
                 Button okButton = dialog.findViewById(R.id.ok_button);
                 WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
                 lp.copyFrom(dialog.getWindow().getAttributes());
-                lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
+                lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.8);
                 lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                 dialog.getWindow().setAttributes(lp);
-                cancelButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                    }
-                });
-
                 okButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
