@@ -22,7 +22,7 @@ import android.widget.TextView;
 import com.example.magic_code.MainActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
-import com.example.magic_code.classes.AuthenticatedUser;
+import com.example.magic_code.models.AuthenticatedUser;
 import com.example.magic_code.ui.profileSettings.ProfileSettings;
 
 public class ProfilePage extends Fragment {

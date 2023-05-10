@@ -1,4 +1,4 @@
-package com.example.magic_code.classes;
+package com.example.magic_code.models;
 
 import com.example.magic_code.models.Note;
 
@@ -8,6 +8,12 @@ import java.util.List;
 public class AuthenticatedUser {
     String username;
     String email;
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    String displayName;
     List<Note> notes;
 
     public String getUsername() {
@@ -23,8 +29,9 @@ public class AuthenticatedUser {
     }
 
     public AuthenticatedUser(HashMap<String,Object> data){
-        username = (String) data.get("Username");
-        email = (String) data.get("Email");
-        notes = (List<Note>) data.get("Notes");
+        username = (String) data.get("username");
+        email = (String) data.get("email");
+        notes = (List<Note>) data.get("notes");
+        displayName = (String) data.get("displayName");
     }
 }

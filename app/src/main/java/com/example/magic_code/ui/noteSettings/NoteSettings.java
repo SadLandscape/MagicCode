@@ -68,7 +68,7 @@ public class NoteSettings extends Fragment {
             public void onClick(View view) {
                 API.Notes.updateSettings(settings);
                 Navigation.findNavController(requireView()).navigateUp();
-                Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Successfully updated settings!", Toast.LENGTH_SHORT).show();
             }
         });
         return view;

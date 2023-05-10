@@ -17,7 +17,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.example.magic_code.api.API;
-import com.example.magic_code.classes.AuthenticatedUser;
+import com.example.magic_code.models.AuthenticatedUser;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.example.magic_code.databinding.ActivityMainBinding;
 import android.Manifest;
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         authToken = sharedPreferences.getString("authToken","");
-        if (!API.Authentication.checkAuth(authToken)){
+        if (!API.Authentication.checkAuth(authToken,this)[1]){
             Intent intent = new Intent(this,AuthenticationActivity.class);
             startActivityForResult(intent,128);
         }
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 128) {
+        if (requestCode == 128 && data!=null) {
             authToken = data.getStringExtra("authToken");
             editor.putString("authToken",authToken);
             editor.apply();

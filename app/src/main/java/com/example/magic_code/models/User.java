@@ -5,6 +5,12 @@ import java.util.HashMap;
 public class User {
     String userId;
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    String displayName;
+
     public String getUserId() {
         return userId;
     }
@@ -23,6 +29,7 @@ public class User {
         userId = data.get("userId");
         username = data.get("username");
         email = data.get("email");
+        displayName = data.get("displayName");
     }
 
 }

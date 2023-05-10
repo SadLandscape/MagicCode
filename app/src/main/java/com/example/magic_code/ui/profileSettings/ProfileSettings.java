@@ -21,7 +21,7 @@ import android.widget.Toast;
 
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
-import com.example.magic_code.classes.AuthenticatedUser;
+import com.example.magic_code.models.AuthenticatedUser;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class ProfileSettings extends Fragment {
