@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class API {
-    public static String API_URL =  "http://192.168.1.106:5000";
+    public static String API_URL =  "https://magiccode-backend.armenkhachatry5.repl.co";
     public static Object[] makeRequest(String endpoint,String method,@Nullable HashMap<String,Object> json,@Nullable String authToken){
         try {
             URL url = new URL(API_URL+endpoint);
