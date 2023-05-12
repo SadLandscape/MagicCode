@@ -69,4 +69,10 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     public int getItemCount() {
         return localDataSet.size();
     }
+
+    public void updateData(List<Note> newData){
+        localDataSet.clear();
+        localDataSet.addAll(newData);
+        notifyDataSetChanged();
+    }
 }

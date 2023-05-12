@@ -11,6 +11,7 @@ import com.example.magic_code.models.Note;
 import com.example.magic_code.models.Settings;
 import com.example.magic_code.models.User;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
@@ -195,12 +196,14 @@ public class API {
             HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
             }.getType());
             List<Note> noteList = new ArrayList<>();
-            List<HashMap<String,Object>> notes = (List<HashMap<String, Object>>) response_data.get("notes");
-            for (HashMap<String,Object> note: notes) {
+            List<LinkedTreeMap<String,Object>> notes = (List<LinkedTreeMap<String, Object>>) response_data.get("notes");
+            for (LinkedTreeMap<String,Object> note_: notes) {
+                HashMap<String,Object> note = new HashMap<>(note_);
                 noteList.add(new Note(note));
             }
             return noteList;
         }
+
         public static AuthenticatedUser getUser(String authToken,Context ctx){
             HashMap<String,Object> exampleUser = new HashMap<>();
             exampleUser.put("Username","Example Username");
@@ -212,6 +215,34 @@ public class API {
     }
 
     public static class Notes {
+        public static boolean createNote(String title, String body, String authToken, Context ctx){
+            HashMap<String,Object> payload = new HashMap<String,Object>(){{
+                put("title",title);
+                put("text",body);
+            }};
+            Object[] response = makeRequest("/api/notes/createNote","POST",payload,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
+            return true;
+
+        }
         public static Note getNote(String id) {
             HashMap<String, Object> exampleNote = new HashMap<String, Object>() {{
                 put("title", "Title here");

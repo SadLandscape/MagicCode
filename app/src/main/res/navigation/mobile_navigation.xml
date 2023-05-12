@@ -9,6 +9,9 @@
         android:name="com.example.magic_code.ui.notes.NotesPage"
         android:id="@+id/notes">
         <action android:id="@+id/action_notes_to_detailed_note_view" app:destination="@id/detailed_note_view" />
+        <action
+            android:id="@+id/action_notes_to_create_notes"
+            app:destination="@id/create_notes" />
     </fragment>
     <fragment
         android:label="Scan"
@@ -41,4 +44,8 @@
         android:label="Profile Settings"
         android:name="com.example.magic_code.ui.profileSettings.ProfileSettings"
         android:id="@+id/profile_settings" />
+    <fragment
+        android:label="Create note"
+        android:name="com.example.magic_code.ui.createNote.createNote"
+        android:id="@+id/create_notes" />
 </navigation>

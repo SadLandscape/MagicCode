@@ -1,5 +1,7 @@
 package com.example.magic_code.models;
 
+import com.google.gson.internal.LinkedTreeMap;
+
 import java.util.HashMap;
 
 public class Note {
@@ -19,7 +21,8 @@ public class Note {
     public Note(HashMap<String,Object> data){
         title = (String) data.get("title");
         text = (String) data.get("text");
-        author = (String) data.get("author");
+        LinkedTreeMap<String,Object> author_ = (LinkedTreeMap) data.get("author");
+        author = (String) author_.get("displayName");
         id = (String) data.get("Id");
         shareToken = (String) data.get("shareToken");
     }

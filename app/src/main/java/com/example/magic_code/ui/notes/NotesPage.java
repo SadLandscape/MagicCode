@@ -13,6 +13,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,11 +40,31 @@ public class NotesPage extends Fragment {
     private SharedPreferences sharedPreferences;
     private String authToken;
     private Dialog dialog;
+    CustomAdapter adapter;
 
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<Note> newData = API.Authentication.getNotes(authToken,getContext());
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.updateData(newData);
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                        });
+                    }
+                }).start();
+            }
+        });
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
@@ -56,9 +77,17 @@ public class NotesPage extends Fragment {
                     @Override
                     public void run() {
                         dialog.dismiss();
-                        CustomAdapter adapter = new CustomAdapter(noteList,getContext());
+                        adapter = new CustomAdapter(noteList,getContext());
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         recyclerView.setAdapter(adapter);
+                        view.findViewById(R.id.floating_action_button).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                NotesPage fragment = NotesPage.newInstance();
+                                NavController navController = Navigation.findNavController(requireView());
+                                navController.navigate(R.id.action_notes_to_create_notes,fragment.getArguments());
+                            }
+                        });
                         ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                             @Override
                             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
