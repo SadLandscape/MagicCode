@@ -2,6 +2,8 @@ package com.example.magic_code.ui.notes;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,7 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.example.magic_code.MainActivity;
+import com.example.magic_code.api.API;
 import com.example.magic_code.classes.CustomAdapter;
 import com.example.magic_code.R;
 import com.example.magic_code.models.Note;
@@ -24,46 +29,60 @@ import com.example.magic_code.utils.ItemClickSupport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class NotesPage extends Fragment {
 
     public static NotesPage newInstance() {
         return new NotesPage();
     }
+    private SharedPreferences sharedPreferences;
+    private String authToken;
+    private Dialog dialog;
 
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        authToken = sharedPreferences.getString("authToken","");
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
-        ArrayList<HashMap<String, Object>> dataset = new ArrayList<>();
-        for (int i = 1; i <= 50; i++) {
-            HashMap<String, Object> data = new HashMap<>();
-            data.put("Title", "Title" + i);
-            data.put("Author", "Author");
-            data.put("ID","40880f57-8655-487a-b31a-fda5123c442c");
-            data.put("ShareToken","40880f57-8655-487a-b31a-fda5123c442c");
-            dataset.add(data);
-        }
-        CustomAdapter adapter = new CustomAdapter(dataset,getContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(adapter);
-        ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+        dialog.show();
+        new Thread(new Runnable() {
             @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Note clickedNote = new Note(dataset.get(position));
-                NoteFragment detailFragment = NoteFragment.newInstance(clickedNote.getId());
-                NavController navController = Navigation.findNavController(requireView());
-                navController.navigate(R.id.action_notes_to_detailed_note_view,detailFragment.getArguments());
+            public void run() {
+                List<Note> noteList = API.Authentication.getNotes(authToken,getContext());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.dismiss();
+                        CustomAdapter adapter = new CustomAdapter(noteList,getContext());
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                        recyclerView.setAdapter(adapter);
+                        ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                            @Override
+                            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                                Note clickedNote = noteList.get(position);
+                                NoteFragment detailFragment = NoteFragment.newInstance(clickedNote.getId());
+                                NavController navController = Navigation.findNavController(requireView());
+                                navController.navigate(R.id.action_notes_to_detailed_note_view,detailFragment.getArguments());
+                            }
+                        });
+                    }
+                });
             }
-        });
-
+        }).start();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.notes, container, false);
+        View view = inflater.inflate(R.layout.notes, container, false);
+        dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.dialog_loading);
+        dialog.setCancelable(false);
+        ((TextView)dialog.findViewById(R.id.status_text)).setText("Loading notes...");
+        return view;
     }
 
     @Override

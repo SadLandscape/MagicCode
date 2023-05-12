@@ -11,13 +11,15 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.magic_code.R;
+import com.example.magic_code.models.Note;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
 
-    private final ArrayList<HashMap<String,Object>> localDataSet;
+    private final List<Note> localDataSet;
     private final Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -44,7 +46,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         }
     }
 
-    public CustomAdapter(ArrayList<HashMap<String, Object>> dataSet, Context ctx) {
+    public CustomAdapter(List<Note> dataSet, Context ctx) {
         localDataSet = dataSet;
         context = ctx;
     }
@@ -58,9 +60,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     }
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        viewHolder.getTextView().setText((String) localDataSet.get(position).get("Title"));
-        viewHolder.getAuthorView().setText((String) localDataSet.get(position).get("Author"));
-        viewHolder.getRootView().setTag((String) localDataSet.get(position).get("ID"));
+        viewHolder.getTextView().setText(localDataSet.get(position).getTitle());
+        viewHolder.getAuthorView().setText(localDataSet.get(position).getAuthor());
+        viewHolder.getRootView().setTag(localDataSet.get(position).getId());
     }
 
     @Override

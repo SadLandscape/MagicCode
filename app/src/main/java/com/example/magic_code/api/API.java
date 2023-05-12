@@ -66,7 +66,7 @@ public class API {
                 }
                 in.close();
                 return new Object[] {true,response.toString()};
-            } else if (responseCode == 400) {
+            } else if (responseCode>=400) {
                 InputStream errorStream = conn.getErrorStream();
                 BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
                 String errorLine;
@@ -80,7 +80,6 @@ public class API {
             conn.disconnect();
         } catch (Exception e) {
             if (e instanceof SocketTimeoutException){
-                Log.d("ERROR", "makeRequest: "+e);
                 return new Object[] {false,"Request timed out, please check your internet and try again!"};
             }
             if (e instanceof ConnectException){
@@ -131,7 +130,7 @@ public class API {
             });
             return (String) response_data.get("authToken");
         }
-        public static  String register(String username,String email,String password,Context ctx){
+        public static String register(String username,String email,String password,Context ctx){
             HashMap<String,Object> requestBody = new HashMap<String,Object>(){{
                 put("username",username);
                 put("email",email);
@@ -164,12 +163,6 @@ public class API {
             boolean status = (boolean) response[0];
             String resp = (String) response[1];
             if (!status){
-                ((Activity) ctx).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ctx, (String)response[1], Toast.LENGTH_SHORT).show();
-                    }
-                });
                 return new boolean[]{false,false};
             }
             HashMap<String, Object> response_data = new Gson().fromJson(resp, new TypeToken<HashMap<String, Object>>() {
@@ -177,24 +170,42 @@ public class API {
             ((Activity) ctx).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show();
+                    if ((boolean) response_data.get("valid")) {
+                        Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
             return new boolean[] {true, (boolean) response_data.get("valid")};
 
         }
-        public static List<Note> getNotes(String authToken){
+        public static List<Note> getNotes(String authToken,Context ctx){
             List<Note> exampleNotes = new ArrayList<>();
-            for (int i=0;i<100;i++){
-                exampleNotes.add(Notes.getNote("note_"+i));
+            Object[] response = makeRequest("/api/user/notes","GET",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return new ArrayList<Note>();
             }
-            return exampleNotes;
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            List<Note> noteList = new ArrayList<>();
+            List<HashMap<String,Object>> notes = (List<HashMap<String, Object>>) response_data.get("notes");
+            for (HashMap<String,Object> note: notes) {
+                noteList.add(new Note(note));
+            }
+            return noteList;
         }
-        public static AuthenticatedUser getUser(String authToken){
+        public static AuthenticatedUser getUser(String authToken,Context ctx){
             HashMap<String,Object> exampleUser = new HashMap<>();
             exampleUser.put("Username","Example Username");
             exampleUser.put("Email","example@gmail.com");
-            exampleUser.put("Notes",getNotes(authToken));
+            exampleUser.put("Notes",getNotes(authToken,ctx));
             exampleUser.put("displayName","display name");
             return new AuthenticatedUser(exampleUser);
         }
@@ -203,11 +214,11 @@ public class API {
     public static class Notes {
         public static Note getNote(String id) {
             HashMap<String, Object> exampleNote = new HashMap<String, Object>() {{
-                put("Title", "Title here");
-                put("Author", "Author here");
-                put("ID", "40880f57-8655-487a-b31a-fda5123c442c");
-                put("ShareToken", "40880f57-8655-487a-b31a-fda5123c442c");
-                put("Text", "*bold* _italic_ ```raw text```");
+                put("title", "Title here");
+                put("author", "Author here");
+                put("Id", "40880f57-8655-487a-b31a-fda5123c442c");
+                put("shareToken", "40880f57-8655-487a-b31a-fda5123c442c");
+                put("text", "*bold* _italic_ ```raw text```");
             }};
             return new Note(exampleNote);
         }
@@ -221,7 +232,7 @@ public class API {
             for (int i = 0; i < 100; i++) {
                 int finalI = i;
                 HashMap<String, String> data = new HashMap<String, String>() {{
-                    put("userId", "id_" + finalI);
+                    put("id", "id_" + finalI);
                     put("email", "email_" + finalI + "@gmail.com");
                     put("username", "username_" + finalI);
                     put("displayName","display name");

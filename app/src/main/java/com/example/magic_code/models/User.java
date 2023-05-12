@@ -26,7 +26,7 @@ public class User {
     String username;
     String email;
     public User(HashMap<String,String> data){
-        userId = data.get("userId");
+        userId = data.get("id");
         username = data.get("username");
         email = data.get("email");
         displayName = data.get("displayName");

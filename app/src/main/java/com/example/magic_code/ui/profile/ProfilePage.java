@@ -42,7 +42,7 @@ public class ProfilePage extends Fragment {
         View view = inflater.inflate(R.layout.profile, container, false);
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        currentUser = API.Authentication.getUser(authToken);
+        currentUser = API.Authentication.getUser(authToken,getContext());
         ((TextView) view.findViewById(R.id.text_username)).setText(currentUser.getUsername());
         ((TextView) view.findViewById(R.id.text_email)).setText(currentUser.getEmail());
         ((Button) view.findViewById(R.id.button_logout)).setOnClickListener(new View.OnClickListener() {

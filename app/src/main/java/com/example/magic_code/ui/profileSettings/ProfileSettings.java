@@ -43,7 +43,7 @@ public class ProfileSettings extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.profile_settings, container, false);
-        currentUser = API.Authentication.getUser(authToken);
+        currentUser = API.Authentication.getUser(authToken,getContext());
         ((EditText) view.findViewById(R.id.editTextUsername)).setText(currentUser.getUsername());
         ((Button) view.findViewById(R.id.buttonChangePassword)).setOnClickListener(new View.OnClickListener() {
             @Override

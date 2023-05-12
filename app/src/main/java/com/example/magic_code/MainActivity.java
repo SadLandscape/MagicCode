@@ -10,6 +10,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.ui.AppBarConfiguration;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,11 +38,23 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         authToken = sharedPreferences.getString("authToken","");
-        if (!API.Authentication.checkAuth(authToken,this)[1]){
-            Intent intent = new Intent(this,AuthenticationActivity.class);
-            startActivityForResult(intent,128);
-        }
-        currentUser = API.Authentication.getUser(authToken);
+        Dialog dialog = new Dialog(MainActivity.this);
+        dialog.setContentView(R.layout.dialog_loading);
+        dialog.setCancelable(false);
+        dialog.show();
+        new Thread(new Runnable() {
+        @Override
+        public void run() {
+            if (!API.Authentication.checkAuth(authToken,MainActivity.this)[1]){
+                Intent intent = new Intent(MainActivity.this,AuthenticationActivity.class);
+                dialog.dismiss();
+                startActivityForResult(intent,128);
+                return;
+            }
+            currentUser = API.Authentication.getUser(authToken,MainActivity.this);
+            dialog.dismiss();
+            }
+        }).start();
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         navbar = findViewById(R.id.bottom_navigation);
