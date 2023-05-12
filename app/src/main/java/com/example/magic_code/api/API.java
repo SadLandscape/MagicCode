@@ -28,12 +28,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class API {
     public static String API_URL =  "https://magiccode-backend.armenkhachatry5.repl.co";
     public static Object[] makeRequest(String endpoint,String method,@Nullable HashMap<String,Object> json,@Nullable String authToken){
         try {
             URL url = new URL(API_URL+endpoint);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setConnectTimeout(10000);
             conn.setReadTimeout(10000);
             conn.setRequestMethod(method.toUpperCase());
@@ -78,6 +80,7 @@ public class API {
             conn.disconnect();
         } catch (Exception e) {
             if (e instanceof SocketTimeoutException){
+                Log.d("ERROR", "makeRequest: "+e);
                 return new Object[] {false,"Request timed out, please check your internet and try again!"};
             }
             if (e instanceof ConnectException){
