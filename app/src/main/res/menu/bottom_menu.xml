@@ -1,9 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/notes"
+        android:id="@+id/boards"
         android:enabled="true"
         android:icon="@drawable/notes_24"
-        android:title="Notes" />
+        android:title="Boards" />
     <item
         android:id="@+id/scan"
         android:enabled="true"

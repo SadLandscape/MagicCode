@@ -1,6 +1,7 @@
 package com.example.magic_code.ui.noteView;
 
 import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -61,6 +63,9 @@ public class NoteFragment extends Fragment {
     private InputMethodManager imm;
     private HtmlRenderer renderer;
     private Parser parser;
+    private SharedPreferences sharedPreferences;
+    private String authToken;
+    private ProgressBar progressBar;
 
     private Boolean isEditing = false;
 
@@ -126,6 +131,13 @@ public class NoteFragment extends Fragment {
                 isEditing = !isEditing;
                 if (isEditing) {
                     item.setIcon(R.drawable.baseline_save_24);
+                    progressBar.setVisibility(View.VISIBLE);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            API.Notes.setBody(note_id,noteText,authToken,getContext());
+                        }
+                    }).start();
                     noteDescription.setText(noteText);
                     noteDescription.setFocusable(true);
                     noteDescription.setFocusableInTouchMode(true);
@@ -153,6 +165,8 @@ public class NoteFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        authToken = sharedPreferences.getString("authToken","");
         imm = ContextCompat.getSystemService(requireContext(), InputMethodManager.class);
         renderer = HtmlRenderer.builder().build();
         parser = Parser.builder().build();
@@ -160,21 +174,33 @@ public class NoteFragment extends Fragment {
         note_id = getArguments().getString("note_id");
         View root_view = inflater.inflate(R.layout.noteview, container, false);
         noteDescription = (EditText) root_view.findViewById(R.id.note_text);
-        note = API.Notes.getNote(note_id);
-        if (noteText == null) {
-            noteText = note.getText();
-        }
-        noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
-        noteDescription.setFocusable(false);
-        noteDescription.setFocusableInTouchMode(false);
-        noteDescription.setClickable(false);
+        progressBar = root_view.findViewById(R.id.progressBar2);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                note = API.Notes.getNote(note_id,authToken,getContext());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setVisibility(View.GONE);
+                        if (noteText == null) {
+                            noteText = note.getText();
+                        }
+                        noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
+                        noteDescription.setFocusable(false);
+                        noteDescription.setFocusableInTouchMode(false);
+                        noteDescription.setClickable(false);
+                    }
+                });
+            }
+        }).start();
         return root_view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        BottomNavigationView bottomNavigationView = (getActivity()).findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNavigationView = requireActivity().findViewById(R.id.bottom_navigation);
         MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.notes);
         menuItem.setChecked(true);
     }

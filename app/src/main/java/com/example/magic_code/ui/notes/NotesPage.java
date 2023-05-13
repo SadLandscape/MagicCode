@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.magic_code.MainActivity;
 import com.example.magic_code.api.API;
 import com.example.magic_code.classes.CustomAdapter;
 import com.example.magic_code.R;
@@ -28,8 +27,6 @@ import com.example.magic_code.models.Note;
 import com.example.magic_code.ui.noteView.NoteFragment;
 import com.example.magic_code.utils.ItemClickSupport;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class NotesPage extends Fragment {
@@ -46,7 +43,7 @@ public class NotesPage extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.board_refresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -67,7 +64,7 @@ public class NotesPage extends Fragment {
         });
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = view.findViewById(R.id.board_recyclerView);
         dialog.show();
         new Thread(new Runnable() {
             @Override
@@ -80,7 +77,7 @@ public class NotesPage extends Fragment {
                         adapter = new CustomAdapter(noteList,getContext());
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         recyclerView.setAdapter(adapter);
-                        view.findViewById(R.id.floating_action_button).setOnClickListener(new View.OnClickListener() {
+                        view.findViewById(R.id.create_board_button).setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 NotesPage fragment = NotesPage.newInstance();

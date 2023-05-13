@@ -7,6 +7,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.example.magic_code.models.AuthenticatedUser;
+import com.example.magic_code.models.Board;
+import com.example.magic_code.models.Category;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.models.Settings;
 import com.example.magic_code.models.User;
@@ -91,6 +93,21 @@ public class API {
         return new Object[] {false,"Internal server error! Please try again later"};
     }
 
+    public static class Boards{
+        public static List<Board> getBoards(String authToken,Context ctx){
+            List<Board> boards = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                int finalI = i;
+                HashMap<String,Object> data = new HashMap<String,Object>(){{
+                    put("title","Board"+ finalI);
+                    put("author","author_"+finalI);
+                    put("categories",new ArrayList<Category>());
+                }};
+                boards.add(new Board(data));
+            }
+            return boards;
+        }
+    }
 
     public static class Authentication {
         public static boolean[] checkUsername(String username){
@@ -243,18 +260,52 @@ public class API {
             return true;
 
         }
-        public static Note getNote(String id) {
-            HashMap<String, Object> exampleNote = new HashMap<String, Object>() {{
-                put("title", "Title here");
-                put("author", "Author here");
-                put("Id", "40880f57-8655-487a-b31a-fda5123c442c");
-                put("shareToken", "40880f57-8655-487a-b31a-fda5123c442c");
-                put("text", "*bold* _italic_ ```raw text```");
-            }};
-            return new Note(exampleNote);
+        public static Note getNote(String id,String authToken,Context ctx) {
+            Object[] response = makeRequest("/api/notes/"+id,"GET",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return null;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            return new Note(response_data);
         }
 
         public static boolean setNote(Note newNote) {
+            return true;
+        }
+
+        public static boolean setBody(String noteId,String newText,String authToken,Context ctx){
+            HashMap<String,Object> payload = new HashMap<String,Object>(){{
+                put("text",newText);
+            }};
+            Object[] response = makeRequest("/api/notes/"+noteId,"PATCH",payload,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
             return true;
         }
 

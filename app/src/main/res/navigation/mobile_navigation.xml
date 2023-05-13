@@ -6,6 +6,11 @@
     app:startDestination="@id/notes">
     <fragment
         android:label="Notes"
+        android:name="com.example.magic_code.ui.boardsView.boardsView"
+        android:id="@+id/boards">
+    </fragment>
+    <fragment
+        android:label="Notes"
         android:name="com.example.magic_code.ui.notes.NotesPage"
         android:id="@+id/notes">
         <action android:id="@+id/action_notes_to_detailed_note_view" app:destination="@id/detailed_note_view" />
