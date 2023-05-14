@@ -182,8 +182,12 @@ public class NoteFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (note == null){
+                            Navigation.findNavController(requireView()).navigateUp();
+                            return;
+                        }
                         progressBar.setVisibility(View.GONE);
-                        if (noteText == null) {
+                        if (noteText == null && note!=null) {
                             noteText = note.getText();
                         }
                         noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
@@ -201,7 +205,7 @@ public class NoteFragment extends Fragment {
     public void onResume() {
         super.onResume();
         BottomNavigationView bottomNavigationView = requireActivity().findViewById(R.id.bottom_navigation);
-        MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.notes);
+        MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
         menuItem.setChecked(true);
     }
 

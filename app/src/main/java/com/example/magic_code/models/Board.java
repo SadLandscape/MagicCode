@@ -2,10 +2,11 @@ package com.example.magic_code.models;
 
 import com.google.gson.internal.LinkedTreeMap;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
-public class Board {
+public class Board implements Serializable {
     String title;
     String author;
     String id;

@@ -26,8 +26,8 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.BoardViewHol
 
         public BoardViewHolder(View itemView) {
             super(itemView);
-            titleTextView = itemView.findViewById(R.id.titleTextView);
-            authorTextView = itemView.findViewById(R.id.authorTextView);
+            titleTextView = itemView.findViewById(R.id.categoryTitleTextView);
+            authorTextView = itemView.findViewById(R.id.categoryAuthorTextView);
         }
 
         public void bind(final Board board, final OnItemClickListener listener) {

@@ -78,7 +78,7 @@ public class NoteSettings extends Fragment {
     public void onResume() {
         super.onResume();
         BottomNavigationView bottomNavigationView = (getActivity()).findViewById(R.id.bottom_navigation);
-        MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.notes);
+        MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
         menuItem.setChecked(true);
     }
 

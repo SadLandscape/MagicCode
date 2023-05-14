@@ -21,8 +21,9 @@ public class Note {
     public Note(HashMap<String,Object> data){
         title = (String) data.get("title");
         text = (String) data.get("text");
-        LinkedTreeMap<String,Object> author_ = (LinkedTreeMap) data.get("author");
-        author = (String) author_.get("displayName");
+//        LinkedTreeMap<String,Object> author_ = (LinkedTreeMap) data.get("author");
+//        author = (String) author_.get("displayName");
+        author = (String) data.get("Author");
         id = (String) data.get("Id");
         shareToken = (String) data.get("shareToken");
     }

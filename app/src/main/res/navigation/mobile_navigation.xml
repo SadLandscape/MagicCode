@@ -3,20 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mobile_navigation2"
-    app:startDestination="@id/notes">
+    app:startDestination="@id/boards">
     <fragment
-        android:label="Notes"
+        android:label="Boards"
         android:name="com.example.magic_code.ui.boardsView.boardsView"
         android:id="@+id/boards">
-    </fragment>
-    <fragment
-        android:label="Notes"
-        android:name="com.example.magic_code.ui.notes.NotesPage"
-        android:id="@+id/notes">
-        <action android:id="@+id/action_notes_to_detailed_note_view" app:destination="@id/detailed_note_view" />
         <action
-            android:id="@+id/action_notes_to_create_notes"
-            app:destination="@id/create_notes" />
+            android:id="@+id/action_boards_to_board_view"
+            app:destination="@id/board_view" />
     </fragment>
     <fragment
         android:label="Scan"
@@ -53,4 +47,12 @@
         android:label="Create note"
         android:name="com.example.magic_code.ui.createNote.createNote"
         android:id="@+id/create_notes" />
+    <fragment
+        android:label="Board"
+        android:name="com.example.magic_code.ui.boardView.boardView"
+        android:id="@+id/board_view" >
+        <action
+            android:id="@+id/action_board_view_to_detailed_note_view"
+            app:destination="@id/detailed_note_view" />
+    </fragment>
 </navigation>

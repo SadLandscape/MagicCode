@@ -1,0 +1,51 @@
+<androidx.cardview.widget.CardView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Category Title and Expand/Collapse Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/category_title"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Category Title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:padding="16dp"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/expand_collapse_button"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="end"
+                android:background="@drawable/expand_collapse_button_background"
+                android:text="+"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
+
+
+        </LinearLayout>
+
+        <!-- Notes Recyclerview -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/notes_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

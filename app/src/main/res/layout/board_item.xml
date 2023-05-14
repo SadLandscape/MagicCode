@@ -17,14 +17,14 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/titleTextView"
+            android:id="@+id/categoryTitleTextView"
             android:layout_width="match_parent"
             android:text="Title"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
         <TextView
-            android:id="@+id/authorTextView"
+            android:id="@+id/categoryAuthorTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

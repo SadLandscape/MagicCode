@@ -92,6 +92,37 @@ public class API {
         }
         return new Object[] {false,"Internal server error! Please try again later"};
     }
+    public static class Categories{
+        public static List<Note> getNotes(){
+            List<Note> noteList = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                int finalI = i;
+                HashMap<String,Object> noteData = new HashMap<String,Object>(){{
+                    put("title","Title "+ finalI);
+                    put("text","Text "+finalI);
+                    put("Id","id_"+finalI);
+                    put("shareToken","shareToken_"+finalI);
+                    put("Author","author "+finalI);
+                }};
+                noteList.add(new Note(noteData));
+            }
+            return noteList;
+        }
+        public static List<Category> getCategories(String authToken){
+            List<Note> noteList = getNotes();
+            List<Category> categoryList = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                int finalI = i;
+                HashMap<String,Object> data = new HashMap<String,Object>(){{
+                    put("title","Category "+ finalI);
+                    put("author","Author " + finalI);
+                    put("notes",new ArrayList<>(noteList));
+                }};
+                categoryList.add(new Category(data));
+            }
+            return categoryList;
+        }
+    }
 
     public static class Boards{
         public static List<Board> getBoards(String authToken,Context ctx){
@@ -185,14 +216,6 @@ public class API {
             }
             HashMap<String, Object> response_data = new Gson().fromJson(resp, new TypeToken<HashMap<String, Object>>() {
             }.getType());
-            ((Activity) ctx).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if ((boolean) response_data.get("valid")) {
-                        Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
             return new boolean[] {true, (boolean) response_data.get("valid")};
 
         }
