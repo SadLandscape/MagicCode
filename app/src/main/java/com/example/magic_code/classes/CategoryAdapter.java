@@ -1,7 +1,9 @@
 package com.example.magic_code.classes;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,21 +65,32 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getItemId() == R.id.menu_delete) {
-                            new Thread(new Runnable() {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+                            builder.setTitle("Delete Item");
+                            builder.setMessage("Are you sure you want to delete this item?");
+                            builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                                 @Override
-                                public void run() {
-                                    boolean status = API.Categories.deleteCategory(category.getId(),authToken,ctx);
-                                    if (status) {
-                                        categoryList.remove(category);
-                                    }
-                                    ((Activity) ctx).runOnUiThread(new Runnable() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    new Thread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            notifyDataSetChanged();
+                                            boolean status = API.Categories.deleteCategory(category.getId(),authToken,ctx);
+                                            if (status) {
+                                                categoryList.remove(category);
+                                            }
+                                            ((Activity) ctx).runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    notifyDataSetChanged();
+                                                }
+                                            });
                                         }
-                                    });
+                                    }).start();
                                 }
-                            }).start();
+                            });
+                            builder.setNegativeButton("Cancel", null);
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
                             return true;
                         }
                         return false;

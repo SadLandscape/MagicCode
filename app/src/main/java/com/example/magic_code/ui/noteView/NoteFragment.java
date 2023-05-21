@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.example.magic_code.MainActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
 import com.example.magic_code.models.Note;
@@ -131,13 +132,6 @@ public class NoteFragment extends Fragment {
                 isEditing = !isEditing;
                 if (isEditing) {
                     item.setIcon(R.drawable.baseline_save_24);
-                    progressBar.setVisibility(View.VISIBLE);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            API.Notes.setBody(note_id,noteText,authToken,getContext());
-                        }
-                    }).start();
                     noteDescription.setText(noteText);
                     noteDescription.setFocusable(true);
                     noteDescription.setFocusableInTouchMode(true);
@@ -146,13 +140,26 @@ public class NoteFragment extends Fragment {
                 } else {
                     item.setIcon(R.drawable.baseline_edit_24);
                     noteText = noteDescription.getText().toString();
+                    progressBar.setVisibility(View.VISIBLE);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            API.Notes.setBody(note_id,noteText,authToken,getContext());
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressBar.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                    }).start();
                     noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
                     noteDescription.setFocusable(false);
                     noteDescription.setFocusableInTouchMode(false);
                     noteDescription.setClickable(false);
                     imm.hideSoftInputFromWindow(noteDescription.getWindowToken(),0);
                 }
-                    return true;
+                return true;
             case android.R.id.home:
                 Navigation.findNavController(requireView()).navigateUp();
                 return true;
@@ -186,6 +193,7 @@ public class NoteFragment extends Fragment {
                             Navigation.findNavController(requireView()).navigateUp();
                             return;
                         }
+                        ((MainActivity) requireActivity()).setActionBarTitle(note.getTitle());
                         progressBar.setVisibility(View.GONE);
                         if (noteText == null && note!=null) {
                             noteText = note.getText();

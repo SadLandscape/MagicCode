@@ -2,6 +2,7 @@ package com.example.magic_code;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -9,7 +10,6 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.ui.AppBarConfiguration;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private AuthenticatedUser currentUser;
+    private ActionBar actionBar;
     private String authToken;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_loading);
         dialog.setCancelable(false);
         dialog.show();
+        actionBar = getSupportActionBar();
         new Thread(new Runnable() {
         @Override
         public void run() {
@@ -53,20 +55,25 @@ public class MainActivity extends AppCompatActivity {
             }
             currentUser = API.Authentication.getUser(authToken,MainActivity.this);
             dialog.dismiss();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    binding = ActivityMainBinding.inflate(getLayoutInflater());
+                    setContentView(binding.getRoot());
+                    navbar = findViewById(R.id.bottom_navigation);
+                    AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                            R.id.boards, R.id.scan, R.id.stories,R.id.profile)
+                            .build();
+                    NavController navController = Navigation.findNavController(MainActivity.this, R.id.nav_host_fragment_activity_main);
+                    NavigationUI.setupActionBarWithNavController(MainActivity.this, navController, appBarConfiguration);
+                    NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    }
+                }
+            });
             }
         }).start();
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        navbar = findViewById(R.id.bottom_navigation);
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.boards, R.id.scan, R.id.stories,R.id.profile)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
     }
 
     @Override
@@ -90,5 +97,9 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please enable permissions!", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public void setActionBarTitle(String title){
+        getSupportActionBar().setTitle(title);
     }
 }

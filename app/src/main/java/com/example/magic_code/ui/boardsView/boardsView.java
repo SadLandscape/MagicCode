@@ -2,6 +2,7 @@ package com.example.magic_code.ui.boardsView;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -18,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
@@ -34,6 +36,7 @@ public class boardsView extends Fragment {
     private BoardsViewViewModel mViewModel;
     String authToken;
     BoardAdapter adapter;
+    Dialog dialog;
     SharedPreferences sharedPreferences;
 
     public static boardsView newInstance() {
@@ -44,6 +47,11 @@ public class boardsView extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.dialog_loading);
+        dialog.setCancelable(false);
+        ((TextView)dialog.findViewById(R.id.status_text)).setText("Loading boards...");
+        dialog.show();
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         View root_view = inflater.inflate(R.layout.fragment_boards_view, container, false);
@@ -55,6 +63,7 @@ public class boardsView extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        dialog.dismiss();
                         adapter = new BoardAdapter(boardList, new BoardAdapter.OnItemClickListener() {
                             @Override
                             public void onItemClick(Board board) {

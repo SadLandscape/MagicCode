@@ -1,7 +1,9 @@
 package com.example.magic_code.ui.boardView;
 
+import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -35,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.magic_code.MainActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
 import com.example.magic_code.classes.CategoryAdapter;
@@ -66,6 +69,26 @@ public class boardView extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.board_menu, menu);
+        View menuItemView = menu.findItem(R.id.create_note_button_menu).getActionView();
+        menuItemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ArrayList<Category> categories = API.Categories.getCategories(board_id,authToken,requireContext());
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                createNote fragment = createNote.newInstance(categories);
+                                NavController navController = Navigation.findNavController(requireView());
+                                navController.navigate(R.id.action_board_view_to_create_notes,fragment.getArguments());
+                            }
+                        });
+                    }
+                }).start();
+            }
+        });
         super.onCreateOptionsMenu(menu,inflater);
     }
 
@@ -83,23 +106,6 @@ public class boardView extends Fragment {
             Navigation.findNavController(requireView()).navigateUp();
             return true;
         }
-        if (item.getItemId() == R.id.create_note_button_menu){
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    ArrayList<Category> categories = API.Categories.getCategories(board_id,authToken,requireContext());
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            createNote fragment = createNote.newInstance(categories);
-                            NavController navController = Navigation.findNavController(requireView());
-                            navController.navigate(R.id.action_board_view_to_create_notes,fragment.getArguments());
-                        }
-                    });
-                }
-            }).start();
-            return true;
-        }
         return true;
     }
 
@@ -114,8 +120,10 @@ public class boardView extends Fragment {
         dialog.show();
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        board_id = ((Board)getArguments().getSerializable("board")).getId();
+        Board board = ((Board)getArguments().getSerializable("board"));
+        board_id = board.getId();
         View root_view = inflater.inflate(R.layout.fragment_board_view, container, false);
+        ((MainActivity) requireActivity()).setActionBarTitle(board.getTitle());
         RecyclerView recyclerView = root_view.findViewById(R.id.category_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         new Thread(new Runnable() {

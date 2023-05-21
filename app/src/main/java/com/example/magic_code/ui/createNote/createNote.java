@@ -104,9 +104,36 @@ public class createNote extends Fragment {
                     categoryDropdown.setError("This field is required!");
                     createButton.setEnabled(false);
                 } else {
-                    createButton.setEnabled(true);
+                    if (!TextUtils.isEmpty(title_edit.getText().toString().trim())) {
+                        createButton.setEnabled(true);
+                    }
                     categoryDropdown.setError(null);
                 }
+            }
+        });
+        title_edit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String note_title = title_edit.getText().toString();
+                if (TextUtils.isEmpty(note_title)) {
+                    title_edit.setError("This field is required!");
+                    createButton.setEnabled(false);
+                } else {
+                    if (!TextUtils.isEmpty(categoryDropdown.getText().toString().trim())) {
+                        createButton.setEnabled(true);
+                    }
+                    title_edit.setError(null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
         createButton.setOnClickListener(new View.OnClickListener() {

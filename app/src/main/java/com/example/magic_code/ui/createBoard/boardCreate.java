@@ -10,9 +10,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.magic_code.R;
@@ -29,12 +34,48 @@ public class boardCreate extends Fragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            Navigation.findNavController(requireView()).navigateUp();
+            return true;
+        }
+        return true;
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         View root_view = inflater.inflate(R.layout.fragment_board_create, container, false);
-        root_view.findViewById(R.id.create_button_board).setOnClickListener(new View.OnClickListener() {
+        EditText editText = root_view.findViewById(R.id.board_title);
+        Button createButton = root_view.findViewById(R.id.create_button_board);
+        createButton.setEnabled(false);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String selectedValue = editText.getText().toString().trim();
+                if (TextUtils.isEmpty(selectedValue)) {
+                    editText.setError("Name must be at least 3 characters long!");
+                    createButton.setEnabled(false);
+                } else {
+                    createButton.setEnabled(true);
+                    editText.setError(null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        createButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new Thread(new Runnable() {

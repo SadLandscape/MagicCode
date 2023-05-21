@@ -56,7 +56,7 @@ public class API {
             if (method.equalsIgnoreCase("POST")) {
                 conn.setDoOutput(true);
             }
-            if (method.equalsIgnoreCase("post")) {
+            if (method.equalsIgnoreCase("post") || method.equalsIgnoreCase("patch")) {
                 String requestBody = new JSONObject(json).toString();
                 OutputStream os = conn.getOutputStream();
                 os.write(requestBody.getBytes());
@@ -117,6 +117,7 @@ public class API {
             Object[] response = makeRequest("/api/categories/" + categoryId, "DELETE", null, authToken);
             boolean status = (boolean) response[0];
             String rbody = (String) response[1];
+            Log.i("ERROR",rbody);
             if (!status) {
                 ((Activity) ctx).runOnUiThread(new Runnable() {
                     @Override
