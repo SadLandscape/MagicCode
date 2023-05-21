@@ -11,6 +11,9 @@
         <action
             android:id="@+id/action_boards_to_board_view"
             app:destination="@id/board_view" />
+        <action
+            android:id="@+id/action_boards_to_create_board"
+            app:destination="@id/create_board" />
     </fragment>
     <fragment
         android:label="Scan"
@@ -54,5 +57,13 @@
         <action
             android:id="@+id/action_board_view_to_detailed_note_view"
             app:destination="@id/detailed_note_view" />
+        <action
+            android:id="@+id/action_board_view_to_create_notes"
+            app:destination="@id/create_notes" />
+    </fragment>
+    <fragment
+        android:label="Create Board"
+        android:name="com.example.magic_code.ui.createBoard.boardCreate"
+        android:id="@+id/create_board" >
     </fragment>
 </navigation>

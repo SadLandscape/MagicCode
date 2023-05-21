@@ -3,11 +3,13 @@ package com.example.magic_code.classes;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +18,8 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.magic_code.R;
+import com.example.magic_code.api.API;
+import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.ui.noteView.NoteFragment;
@@ -27,10 +31,12 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     private List<Category> categoryList;
     private Context ctx;
+    private String authToken;
 
-    public CategoryAdapter(List<Category> categoryList,Context ctx) {
+    public CategoryAdapter(List<Category> categoryList,Context ctx,String authToken) {
         this.categoryList = categoryList;
         this.ctx = ctx;
+        this.authToken = authToken;
     }
 
     @NonNull
@@ -48,6 +54,40 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         holder.notesRecyclerView.setLayoutManager(new LinearLayoutManager(ctx));
         holder.notesRecyclerView.setAdapter(noteAdapter);
         holder.categoryTitleTextView.setText(category.getTitle());
+        holder.categoryTitleTextView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(ctx, holder.itemView);
+                popupMenu.getMenuInflater().inflate(R.menu.delete_menu, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getItemId() == R.id.menu_delete) {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    boolean status = API.Categories.deleteCategory(category.getId(),authToken,ctx);
+                                    if (status) {
+                                        categoryList.remove(category);
+                                    }
+                                    ((Activity) ctx).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            notifyDataSetChanged();
+                                        }
+                                    });
+                                }
+                            }).start();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
+
+                return true;
+            }
+        });
         holder.expandCollapseButton.setOnClickListener(view -> {
             boolean isExpanded = holder.notesRecyclerView.getVisibility() == View.VISIBLE;
             holder.notesRecyclerView.setVisibility(isExpanded ? View.GONE : View.VISIBLE);
@@ -76,6 +116,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     @Override
     public int getItemCount() {
         return categoryList.size();
+    }
+    public void updateData(List<Category> newData){
+        categoryList.clear();
+        categoryList.addAll(newData);
+        notifyDataSetChanged();
     }
 
     static class CategoryViewHolder extends RecyclerView.ViewHolder {

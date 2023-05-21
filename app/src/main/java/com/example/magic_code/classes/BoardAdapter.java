@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.magic_code.R;
 import com.example.magic_code.models.Board;
+import com.example.magic_code.models.Note;
 
 import java.util.List;
 
@@ -62,5 +63,10 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.BoardViewHol
     @Override
     public int getItemCount() {
         return boards.size();
+    }
+    public void updateData(List<Board> newData){
+        boards.clear();
+        boards.addAll(newData);
+        notifyDataSetChanged();
     }
 }

@@ -31,9 +31,8 @@ public class Board implements Serializable {
     public Board(HashMap<String,Object> data){
         title = (String) data.get("title");
         id = (String) data.get("Id");
-//        LinkedTreeMap<String,Object> author_ = (LinkedTreeMap) data.get("author");
-//        author = (String) author_.get("displayName");
-        author = (String) data.get("author");
+        LinkedTreeMap<String,Object> author_ = (LinkedTreeMap) data.get("author");
+        author = (String) author_.get("displayName");
         categoryList = (List<Category>) data.get("categories");
     }
 }
