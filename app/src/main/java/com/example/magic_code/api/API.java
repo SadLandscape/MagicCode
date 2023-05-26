@@ -12,6 +12,7 @@ import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.models.Settings;
+import com.example.magic_code.models.ShareToken;
 import com.example.magic_code.models.User;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
@@ -213,6 +214,91 @@ public class API {
             }
             return boardList;
         }
+        public static Board getBoard(String board_id,String authToken, Context ctx){
+            Object[] response = makeRequest("/api/boards/"+board_id,"GET",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(()-> {
+                        Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
+                });
+                return null;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {}.getType());
+            return new Board(response_data);
+        }
+        public static ShareToken generateToken(String board_id,String authToken,Boolean readOnly,Context ctx){
+            HashMap<String,Object> payload = new HashMap<String,Object>(){{
+                put("boardId",board_id);
+                put("can_write",!readOnly);
+            }};
+            Object[] response = makeRequest("/api/tokens/generate","POST",payload,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return null;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {}.getType());
+            return new ShareToken(response_data);
+        }
+
+        public static List<ShareToken> getTokens(String boardId, String authToken, Context ctx){
+            Object[] response = makeRequest("/api/boards/"+boardId+"/tokens","GET",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return new ArrayList<>();
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            List<ShareToken> tokenList = new ArrayList<>();
+            List<LinkedTreeMap<String,Object>> tokens = (List<LinkedTreeMap<String, Object>>) response_data.get("tokens");
+            for (LinkedTreeMap<String,Object> token: tokens) {
+                HashMap<String,Object> token_ = new HashMap<>(token);
+                tokenList.add(new ShareToken(token_));
+            }
+            return tokenList;
+        }
+
+        public static boolean joinBoard(String shareId,String authToken,Context ctx){
+            HashMap<String,Object> payload = new HashMap<String,Object>(){{
+                put("shareToken",shareId);
+            }};
+            Object[] response = makeRequest("/api/boards/join","POST",payload,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
+            return true;
+        }
+
         public static boolean createBoard(String title, String authToken, Context ctx){
             HashMap<String,Object> payload = new HashMap<String,Object>(){{
                 put("title",title);
@@ -238,7 +324,53 @@ public class API {
                 }
             });
             return true;
+        }
+        public static boolean deleteBoard(String board_id,String authToken,Context ctx){
+            Object[] response = makeRequest("/api/boards/"+board_id,"DELETE",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
+            return true;
+        }
 
+        public static boolean leaveBoard(String board_id, String authToken, Context ctx) {
+            Object[] response = makeRequest("/api/boards/"+board_id+"/leave","POST",new HashMap<>(),authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
+            return true;
         }
     }
 
@@ -357,6 +489,27 @@ public class API {
     }
 
     public static class Notes {
+
+        public static boolean updateNote(String note_id,String title, Category category,String authToken, Context ctx){
+            HashMap<String,Object> payload = new HashMap<String,Object>(){{
+                put("title",title);
+                put("categoryId",category.getId());
+            }};
+            Object[] response = makeRequest("/api/notes/"+note_id+"/updateSettings","POST",payload,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show());
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(() -> {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+            });
+            return true;
+        }
+
         public static boolean createNote(String title, String body,String category_id, String authToken, Context ctx){
             HashMap<String,Object> payload = new HashMap<String,Object>(){{
                 put("title",title);
@@ -384,8 +537,9 @@ public class API {
                 }
             });
             return true;
-
         }
+
+
         public static Note getNote(String id,String authToken,Context ctx) {
             Object[] response = makeRequest("/api/notes/"+id,"GET",null,authToken);
             boolean status = (boolean) response[0];
@@ -402,10 +556,6 @@ public class API {
             HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
             }.getType());
             return new Note(response_data);
-        }
-
-        public static boolean setNote(Note newNote) {
-            return true;
         }
 
         public static boolean setBody(String noteId,String newText,String authToken,Context ctx){
@@ -435,25 +585,28 @@ public class API {
             return true;
         }
 
-        public static Settings getSettings(String note_id) {
-            List<User> users = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                int finalI = i;
-                HashMap<String, String> data = new HashMap<String, String>() {{
-                    put("id", "id_" + finalI);
-                    put("email", "email_" + finalI + "@gmail.com");
-                    put("username", "username_" + finalI);
-                    put("displayName","display name");
-                }};
-                users.add(new User(data));
+        public static boolean deleteNote(String noteId,String authToken,Context ctx){
+            Object[] response = makeRequest("/api/notes/" + noteId, "DELETE", null, authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            Log.i("ERROR",rbody);
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return false;
             }
-            HashMap<String, Object> exampleSettings = new HashMap<String, Object>() {{
-                put("Title", "Title here");
-                put("Users", users);
-            }};
-            return new Settings(exampleSettings);
-        }
-        public static boolean updateSettings(Settings settings){
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
             return true;
         }
     }

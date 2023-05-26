@@ -82,7 +82,7 @@ public class boardCreate extends Fragment {
                     @Override
                     public void run() {
                         API.Boards.createBoard(((EditText)root_view.findViewById(R.id.board_title)).getText().toString(),authToken,getContext());
-                        getActivity().runOnUiThread(new Runnable() {
+                        requireActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Navigation.findNavController(requireView()).navigateUp();

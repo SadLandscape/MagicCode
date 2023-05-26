@@ -1,13 +1,20 @@
 package com.example.magic_code.classes;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.magic_code.R;
+import com.example.magic_code.api.API;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Note;
 
@@ -16,12 +23,14 @@ import java.util.List;
 public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.BoardViewHolder> {
     private List<Board> boards;
     private OnItemClickListener listener;
+    private String authToken;
+    private Context ctx;
 
     public interface OnItemClickListener {
         void onItemClick(Board board);
     }
 
-    public static class BoardViewHolder extends RecyclerView.ViewHolder {
+    public class BoardViewHolder extends RecyclerView.ViewHolder {
         private TextView titleTextView;
         private TextView authorTextView;
 
@@ -34,7 +43,53 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.BoardViewHol
         public void bind(final Board board, final OnItemClickListener listener) {
             titleTextView.setText(board.getTitle());
             authorTextView.setText(board.getAuthor());
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    PopupMenu popupMenu = new PopupMenu(ctx,itemView);
+                    popupMenu.getMenuInflater().inflate(R.menu.delete_menu, popupMenu.getMenu());
+                    popupMenu.getMenu().findItem(R.id.menu_delete).setTitle(board.canDelete() ? "Delete" : "Leave");
 
+                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            if (item.getItemId() == R.id.menu_delete) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+                                builder.setTitle(board.canDelete() ? "Delete Board" : "Leave Board");
+                                builder.setMessage("Are you sure you want to " +(board.canDelete() ?"delete":"leave")+" this board?");
+                                builder.setPositiveButton(board.canDelete() ?"Delete" : "Leave", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                boolean status = board.canDelete() ? API.Boards.deleteBoard(board.getId(),authToken,ctx) : API.Boards.leaveBoard(board.getId(),authToken,ctx);
+                                                if (status) {
+                                                    BoardAdapter.this.boards.remove(board);
+                                                }
+                                                ((Activity) ctx).runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        notifyDataSetChanged();
+                                                    }
+                                                });
+                                            }
+                                        }).start();
+                                    }
+                                });
+                                builder.setNegativeButton("Cancel", null);
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+                    popupMenu.show();
+
+                    return true;
+                }
+            });
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -44,9 +99,11 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.BoardViewHol
         }
     }
 
-    public BoardAdapter(List<Board> boards, OnItemClickListener listener) {
+    public BoardAdapter(List<Board> boards, OnItemClickListener listener,String authToken,Context ctx) {
         this.boards = boards;
         this.listener = listener;
+        this.authToken = authToken;
+        this.ctx = ctx;
     }
 
     @Override

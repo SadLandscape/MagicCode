@@ -7,4 +7,17 @@
         android:title="New Note"
         app:showAsAction="always"
         app:actionLayout="@layout/menu_item_new_note"/>
+    <item
+        android:id="@+id/shareOption"
+        android:icon="@drawable/baseline_share_24"
+        android:title="Share" />
+    <item
+        android:id="@+id/manageBoardOption"
+        android:checked="false"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="Manage" />
+    <item android:id="@+id/deleteOption"
+        android:visible="false"
+        android:icon="@drawable/baseline_delete_24"
+        android:title="Delete" />
 </menu>

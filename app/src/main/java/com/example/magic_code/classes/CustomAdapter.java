@@ -1,9 +1,15 @@
 package com.example.magic_code.classes;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +17,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.magic_code.R;
+import com.example.magic_code.api.API;
 import com.example.magic_code.models.Note;
 
 import java.util.ArrayList;
@@ -21,6 +28,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     private final List<Note> localDataSet;
     private final Context context;
+    private Boolean canDelete;
+    private String authToken;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
@@ -46,9 +55,11 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         }
     }
 
-    public CustomAdapter(List<Note> dataSet, Context ctx) {
+    public CustomAdapter(List<Note> dataSet,Boolean canDelete ,Context ctx,String authToken) {
         localDataSet = dataSet;
         context = ctx;
+        this.authToken = authToken;
+        this.canDelete = canDelete;
     }
 
     @NonNull
@@ -60,9 +71,56 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     }
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        viewHolder.getTextView().setText(localDataSet.get(position).getTitle());
-        viewHolder.getAuthorView().setText(localDataSet.get(position).getAuthor());
-        viewHolder.getRootView().setTag(localDataSet.get(position).getId());
+        Note note = localDataSet.get(position);
+        viewHolder.getTextView().setText(note.getTitle());
+        viewHolder.getAuthorView().setText(note.getAuthor());
+        viewHolder.getRootView().setTag(note.getId());
+        if (canDelete) {
+            viewHolder.getRootView().setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    PopupMenu popupMenu = new PopupMenu(context, viewHolder.getRootView());
+                    popupMenu.getMenuInflater().inflate(R.menu.delete_menu, popupMenu.getMenu());
+                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            if (item.getItemId() == R.id.menu_delete) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                builder.setTitle("Delete Note");
+                                builder.setMessage("Are you sure you want to delete this note?");
+                                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                boolean status = API.Notes.deleteNote(note.getId(), authToken, context);
+                                                if (status) {
+                                                    localDataSet.remove(note);
+                                                }
+                                                ((Activity) context).runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        notifyDataSetChanged();
+                                                    }
+                                                });
+                                            }
+                                        }).start();
+                                    }
+                                });
+                                builder.setNegativeButton("Cancel", null);
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+                    popupMenu.show();
+                    return true;
+                }
+            });
+        }
     }
 
     @Override

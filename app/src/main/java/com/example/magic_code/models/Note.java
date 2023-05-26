@@ -18,12 +18,13 @@ public class Note {
     String author;
     String id;
     String shareToken;
+    Category category;
     public Note(HashMap<String,Object> data){
         title = (String) data.get("title");
         text = (String) data.get("text");
-//        LinkedTreeMap<String,Object> author_ = (LinkedTreeMap) data.get("author");
-//        author = (String) author_.get("displayName");
-        author = (String) data.get("Author");
+        LinkedTreeMap<String,Object> author_ = (LinkedTreeMap) data.get("author");
+        author = (String) author_.get("displayName");
+        category = new Category(new HashMap<>((LinkedTreeMap)data.get("category")));
         id = (String) data.get("Id");
         shareToken = (String) data.get("shareToken");
     }
@@ -36,4 +37,5 @@ public class Note {
     public String getShareToken(){
         return shareToken;
     }
+    public Category getCategory(){ return category;}
 }

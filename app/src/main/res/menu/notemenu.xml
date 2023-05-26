@@ -6,16 +6,8 @@
         android:title="Share"
         app:showAsAction="always" />
     <item
-        android:id="@+id/shareOption"
-        android:icon="@drawable/baseline_share_24"
-        android:title="Share" />
-    <item
         android:id="@+id/manageOption"
-        android:checked="false"
+        android:title="Manage"
         android:icon="@drawable/baseline_settings_24"
-        android:title="Manage" />
-    <item android:id="@+id/deleteOption"
-        android:visible="false"
-        android:icon="@drawable/baseline_delete_24"
-        android:title="Delete" />
+        app:showAsAction="always" />
 </menu>

@@ -1,6 +1,7 @@
 package com.example.magic_code.ui.scan;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.magic_code.api.API;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
@@ -41,6 +43,8 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
 
     private DecoratedBarcodeView barcodeView;
     private BeepManager beepManager;
+    private String authToken;
+    SharedPreferences sharedPreferences;
 
     public static ScanPage newInstance() {
         return new ScanPage();
@@ -50,6 +54,8 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        authToken = sharedPreferences.getString("authToken","");
         View view = inflater.inflate(R.layout.scan, container, false);
         barcodeView = view.findViewById(R.id.barcode_scanner);
         beepManager = new BeepManager(getActivity());
@@ -94,7 +100,13 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
                 try {
                     Result result = reader.decode(binaryBitmap);
                     String contents = result.getText();
-                    Toast.makeText(getContext(), contents, Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "Checking QR...", Toast.LENGTH_SHORT).show();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            API.Boards.joinBoard(contents,authToken,requireContext());
+                        }
+                    }).start();
                 } catch (NotFoundException e) {
                     e.printStackTrace();
                 }
@@ -132,8 +144,13 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
         @Override
         public void barcodeResult(BarcodeResult result) {
             beepManager.playBeepSoundAndVibrate();
-            Log.d(TAG, "QR code: " + result.getText());
-            Toast.makeText(getActivity(), "QR CODE: "+result.getText(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Checking QR...", Toast.LENGTH_SHORT).show();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    API.Boards.joinBoard(result.getText(),authToken,requireContext());
+                }
+            }).start();
         }
 
         @Override
@@ -143,11 +160,9 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
 
     @Override
     public void onTorchOn() {
-        // Do something when the flashlight is turned on
     }
 
     @Override
     public void onTorchOff() {
-        // Do something when the flashlight is turned off
     }
 }

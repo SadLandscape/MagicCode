@@ -31,14 +31,15 @@ import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
+    private Board board;
     private List<Category> categoryList;
     private Context ctx;
     private String authToken;
-
-    public CategoryAdapter(List<Category> categoryList,Context ctx,String authToken) {
+    public CategoryAdapter(List<Category> categoryList, Board board, Context ctx, String authToken) {
         this.categoryList = categoryList;
         this.ctx = ctx;
         this.authToken = authToken;
+        this.board = board;
     }
 
     @NonNull
@@ -52,55 +53,38 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
         Category category = categoryList.get(position);
-        CustomAdapter noteAdapter = new CustomAdapter(category.getNoteList(),ctx);
+        CustomAdapter noteAdapter = new CustomAdapter(category.getNoteList(),board.canEdit(),ctx,authToken);
         holder.notesRecyclerView.setLayoutManager(new LinearLayoutManager(ctx));
         holder.notesRecyclerView.setAdapter(noteAdapter);
         holder.categoryTitleTextView.setText(category.getTitle());
-        holder.categoryTitleTextView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
+        if (board.canEdit()) {
+            holder.categoryTitleTextView.setOnLongClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(ctx, holder.itemView);
                 popupMenu.getMenuInflater().inflate(R.menu.delete_menu, popupMenu.getMenu());
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getItemId() == R.id.menu_delete) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-                            builder.setTitle("Delete Item");
-                            builder.setMessage("Are you sure you want to delete this item?");
-                            builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            boolean status = API.Categories.deleteCategory(category.getId(),authToken,ctx);
-                                            if (status) {
-                                                categoryList.remove(category);
-                                            }
-                                            ((Activity) ctx).runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    notifyDataSetChanged();
-                                                }
-                                            });
-                                        }
-                                    }).start();
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", null);
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
-                            return true;
-                        }
-                        return false;
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    if (item.getItemId() == R.id.menu_delete) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+                        builder.setTitle("Delete Category");
+                        builder.setMessage("Are you sure you want to delete this category?");
+                        builder.setPositiveButton("Delete", (dialog, which) -> new Thread(() -> {
+                            boolean status = API.Categories.deleteCategory(category.getId(), authToken, ctx);
+                            if (status) {
+                                categoryList.remove(category);
+                            }
+                            ((Activity) ctx).runOnUiThread(() -> notifyDataSetChanged());
+                        }).start());
+                        builder.setNegativeButton("Cancel", null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        return true;
                     }
+                    return false;
                 });
                 popupMenu.show();
 
                 return true;
-            }
-        });
+            });
+        }
         holder.expandCollapseButton.setOnClickListener(view -> {
             boolean isExpanded = holder.notesRecyclerView.getVisibility() == View.VISIBLE;
             holder.notesRecyclerView.setVisibility(isExpanded ? View.GONE : View.VISIBLE);
@@ -115,14 +99,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             holder.notesRecyclerView.startAnimation(fadeInAnimation);
             holder.expandCollapseButton.setText(isExpanded ? "+" : "-");
         });
-        ItemClickSupport.addTo(holder.notesRecyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-            @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Note clickedNote = category.getNoteList().get(position);
-                NoteFragment detailFragment = NoteFragment.newInstance(clickedNote.getId());
-                NavController navController = Navigation.findNavController(((Activity) ctx),R.id.nav_host_fragment_activity_main);
-                navController.navigate(R.id.action_board_view_to_detailed_note_view,detailFragment.getArguments());
-            }
+        ItemClickSupport.addTo(holder.notesRecyclerView).setOnItemClickListener((recyclerView, position1, v) -> {
+            Note clickedNote = category.getNoteList().get(position1);
+            NoteFragment detailFragment = NoteFragment.newInstance(clickedNote.getId(),board.canEdit(),board);
+            NavController navController = Navigation.findNavController(((Activity) ctx), R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.action_board_view_to_detailed_note_view, detailFragment.getArguments());
         });
     }
 

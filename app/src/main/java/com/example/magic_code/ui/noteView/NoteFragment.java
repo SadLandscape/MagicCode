@@ -31,6 +31,7 @@ import androidx.navigation.Navigation;
 import com.example.magic_code.MainActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
+import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.ui.noteSettings.NoteSettings;
 import com.example.magic_code.utils.MediaStoreSupport;
@@ -48,10 +49,12 @@ public class NoteFragment extends Fragment {
 
     private String note_id;
 
-    public static NoteFragment newInstance(String note_id) {
+    public static NoteFragment newInstance(String note_id, Boolean canEdit, Board board) {
         NoteFragment fragment = new NoteFragment();
         Bundle args = new Bundle();
         args.putString("note_id", note_id);
+        args.putBoolean("canEdit",canEdit);
+        args.putSerializable("board",board);
         fragment.setArguments(args);
         Log.d("MAGIC CODE", "newInstance: "+fragment.getArguments());
         return fragment;
@@ -62,9 +65,11 @@ public class NoteFragment extends Fragment {
     private String noteText;
     private Note note;
     private InputMethodManager imm;
+    private Board board;
     private HtmlRenderer renderer;
     private Parser parser;
     private SharedPreferences sharedPreferences;
+    private Boolean canEdit;
     private String authToken;
     private ProgressBar progressBar;
 
@@ -72,6 +77,7 @@ public class NoteFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        if (!canEdit){return;}
         inflater.inflate(R.menu.notemenu, menu);
         super.onCreateOptionsMenu(menu,inflater);
     }
@@ -79,54 +85,10 @@ public class NoteFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.shareOption:
-                int size = 500;
-                BitMatrix bitMatrix = null;
-                try {
-                    bitMatrix = new MultiFormatWriter().encode(note.getShareToken(), BarcodeFormat.QR_CODE, size, size);
-                } catch (WriterException e) {
-                    Toast.makeText(getActivity(), "Unable to share: "+e, Toast.LENGTH_SHORT).show();
-                }
-                int width = bitMatrix.getWidth();
-                int height = bitMatrix.getHeight();
-                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                for (int x = 0; x < width; x++) {
-                    for (int y = 0; y < height; y++) {
-                        bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
-                    }
-                }
-                final Dialog dialog = new Dialog(getActivity());
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.dialog_qr_code);
-                ImageView imageView = dialog.findViewById(R.id.image_view_qr_code);
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                lp.copyFrom(dialog.getWindow().getAttributes());
-                lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
-                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                dialog.getWindow().setAttributes(lp);
-                dialog.findViewById(R.id.button_close).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.findViewById(R.id.button_save).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        MediaStoreSupport.saveImageToGallery(bitmap,"note",getContext());
-                        dialog.dismiss();
-                    }
-                });
-                imageView.setImageBitmap(bitmap);
-                dialog.show();
-                return true;
             case R.id.manageOption:
-                NoteSettings fragment = NoteSettings.newInstance(note_id);
+                NoteSettings fragment = NoteSettings.newInstance(note_id,board);
                 NavController navController = Navigation.findNavController(requireView());
                 navController.navigate(R.id.action_detailed_note_view_to_fragment_note_settings,fragment.getArguments());
-                return true;
-            case R.id.deleteOption:
-                // TODO Handle delete option click
                 return true;
             case R.id.editOption:
                 isEditing = !isEditing;
@@ -172,6 +134,8 @@ public class NoteFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        canEdit = getArguments().getBoolean("canEdit");
+        board = (Board) getArguments().getSerializable("board");
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         imm = ContextCompat.getSystemService(requireContext(), InputMethodManager.class);

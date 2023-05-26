@@ -1,6 +1,7 @@
 package com.example.magic_code.ui.boardView;
 
 import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
@@ -34,6 +35,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,9 +45,8 @@ import com.example.magic_code.api.API;
 import com.example.magic_code.classes.CategoryAdapter;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
-import com.example.magic_code.models.Note;
+import com.example.magic_code.models.ShareToken;
 import com.example.magic_code.ui.createNote.createNote;
-import com.example.magic_code.ui.noteSettings.NoteSettings;
 import com.example.magic_code.utils.MediaStoreSupport;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.zxing.BarcodeFormat;
@@ -63,11 +64,15 @@ public class boardView extends Fragment {
     SharedPreferences sharedPreferences;
     CategoryAdapter adapter;
     Dialog dialog;
+    Board board;
     SwipeRefreshLayout refreshLayout;
     String board_id;
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        if (!board.canEdit()){
+            return;
+        }
         inflater.inflate(R.menu.board_menu, menu);
         View menuItemView = menu.findItem(R.id.create_note_button_menu).getActionView();
         menuItemView.setOnClickListener(new View.OnClickListener() {
@@ -106,6 +111,80 @@ public class boardView extends Fragment {
             Navigation.findNavController(requireView()).navigateUp();
             return true;
         }
+        if (item.getItemId() == R.id.shareOption){
+            final Dialog dialog = new Dialog(getActivity());
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.dialog_qr_generate);
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(lp);
+            SwitchCompat readOnly = dialog.findViewById(R.id.switch_read_only);
+            dialog.findViewById(R.id.button_generate).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    view.setEnabled(false);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ShareToken newToken = API.Boards.generateToken(board_id,authToken,readOnly.isChecked(),requireContext());
+                            if (newToken == null){
+                                return;
+                            }
+                            requireActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    view.setEnabled(true);
+                                    dialog.dismiss();
+                                    int size = 500;
+                                    BitMatrix bitMatrix = null;
+                                    try {
+                                        bitMatrix = new MultiFormatWriter().encode(newToken.getId(), BarcodeFormat.QR_CODE, size, size);
+                                    } catch (WriterException e) {
+                                        Toast.makeText(getActivity(), "Unable to share: "+e, Toast.LENGTH_SHORT).show();
+                                    }
+                                    int width = bitMatrix.getWidth();
+                                    int height = bitMatrix.getHeight();
+                                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                                    for (int x = 0; x < width; x++) {
+                                        for (int y = 0; y < height; y++) {
+                                            bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                                        }
+                                    }
+                                    final Dialog dialog1 = new Dialog(getActivity());
+                                    dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                    dialog1.setContentView(R.layout.dialog_qr_code);
+                                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                                    lp.copyFrom(dialog1.getWindow().getAttributes());
+                                    lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
+                                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                                    ImageView imageView = dialog1.findViewById(R.id.image_view_qr_code);
+                                    dialog1.getWindow().setAttributes(lp);
+                                    dialog1.findViewById(R.id.button_close).setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            dialog1.dismiss();
+                                        }
+                                    });
+                                    dialog1.findViewById(R.id.button_save).setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            MediaStoreSupport.saveImageToGallery(bitmap,"note",getContext());
+                                            dialog1.dismiss();
+                                        }
+                                    });
+                                    imageView.setImageBitmap(bitmap);
+                                    dialog1.show();
+                                }
+                            });
+                        }
+                    }).start();
+                }
+            });
+            dialog.show();
+            return true;
+        }
         return true;
     }
 
@@ -120,7 +199,7 @@ public class boardView extends Fragment {
         dialog.show();
         sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        Board board = ((Board)getArguments().getSerializable("board"));
+        board = ((Board)getArguments().getSerializable("board"));
         board_id = board.getId();
         View root_view = inflater.inflate(R.layout.fragment_board_view, container, false);
         ((MainActivity) requireActivity()).setActionBarTitle(board.getTitle());
@@ -133,7 +212,7 @@ public class boardView extends Fragment {
                 requireActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        adapter = new CategoryAdapter(categories,getContext(),authToken);
+                        adapter = new CategoryAdapter(categories,board,getContext(),authToken);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         recyclerView.setAdapter(adapter);
                         dialog.dismiss();
@@ -160,6 +239,9 @@ public class boardView extends Fragment {
                 }).start();
             }
         });
+        if (!board.canEdit()) {
+            root_view.findViewById(R.id.create_category_button).setVisibility(View.GONE);
+        }
         root_view.findViewById(R.id.create_category_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

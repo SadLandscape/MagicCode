@@ -71,7 +71,7 @@ public class boardsView extends Fragment {
                                 NavController navController = Navigation.findNavController(requireView());
                                 navController.navigate(R.id.action_boards_to_board_view,fragment.getArguments());
                             }
-                        });
+                        },authToken,requireContext());
 
                         RecyclerView recyclerView = root_view.findViewById(R.id.board_recyclerView);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
