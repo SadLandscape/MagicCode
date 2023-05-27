@@ -1,54 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    app:cardUseCompatPadding="true"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp"
-    app:cardBackgroundColor="@android:color/white">
-
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="8.0dip"
+    app:cardElevation="4.0dip"
+    app:cardUseCompatPadding="true">
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
-
-        <TextView
-            android:id="@+id/user_name_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:text="Username"/>
-
-        <TextView
-            android:id="@+id/user_email_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"
-            android:text="email"/>
-
+        android:orientation="horizontal"
+        android:padding="8.0dip"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switch_read_only"
-                android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_width="0.0dip"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0">
+            <TextView
+                android:textSize="16.0sp"
+                android:textStyle="bold"
+                android:id="@+id/user_name_textview"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="4dp"
-                android:text="Read-Only" />
-            <ImageButton
-                android:id="@+id/remove_user_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#EF5350"
-                android:src="@drawable/baseline_remove_24" />
+                android:text="Username" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:textSize="12.0sp"
+                android:textColor="@android:color/darker_gray"
+                android:ellipsize="end"
+                android:id="@+id/user_email_textview"
+                android:layout_width="fill_parent"
+                android:layout_height="0.0dip"
+                android:text="email"
+                android:maxLines="1"
+                android:layout_weight="1.0" />
         </LinearLayout>
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_read_only"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:text="Read-Only" />
+        <ImageButton
+            android:id="@+id/remove_user_button"
+            android:layout_width="40.0dip"
+            android:layout_height="40.0dip"
+            android:src="@drawable/baseline_remove_24"
+            android:backgroundTint="#ffef5350" />
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>

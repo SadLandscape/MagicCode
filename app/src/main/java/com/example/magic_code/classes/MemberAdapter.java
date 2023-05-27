@@ -1,5 +1,6 @@
 package com.example.magic_code.classes;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.magic_code.R;
+import com.example.magic_code.models.Category;
 import com.example.magic_code.models.Member;
 import com.example.magic_code.models.Settings;
 import com.example.magic_code.models.User;
@@ -20,15 +22,19 @@ import java.util.List;
 public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.UserViewHolder> {
 
     private List<Member> memberList;
+    private Context ctx;
+    private String authToken;
 
-    public MemberAdapter(List<Member> members) {
+    public MemberAdapter(List<Member> members, Context ctx,String authToken) {
         memberList = members;
+        this.ctx = ctx;
+        this.authToken = authToken;
     }
 
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
+        View itemView = LayoutInflater.from(ctx)
                 .inflate(R.layout.user_item_view, parent, false);
         return new UserViewHolder(itemView);
     }
@@ -58,5 +64,10 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.UserViewHo
             userEmailTextView = itemView.findViewById(R.id.user_email_textview);
             readOnlySwitch = itemView.findViewById(R.id.switch_read_only);
         }
+    }
+    public void updateData(List<Member> members){
+        memberList.clear();
+        memberList.addAll(members);
+        notifyDataSetChanged();
     }
 }

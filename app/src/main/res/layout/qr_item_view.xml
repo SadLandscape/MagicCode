@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tokenHolder" android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="8.0dip"
+    app:cardElevation="2.0dip"
+    app:cardUseCompatPadding="true">
+    <LinearLayout
+        android:gravity="start"
+        android:orientation="horizontal"
+        android:padding="4.0dip"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="4.0dip"
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0">
+            <TextView android:textSize="14.0sp"
+                android:textStyle="bold" android:id="@+id/qr_id_view"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="ID" />
+            <TextView
+                android:textSize="10.0sp"
+                android:textColor="@android:color/black"
+                android:id="@+id/qr_uses_view"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Uses: " />
+            <androidx.appcompat.widget.SwitchCompat
+                android:enabled="false"
+                android:textSize="8.0sp"
+                android:id="@+id/qrPermSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="18.0dip"
+                android:text="Read-Only" />
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/remove_qr_button"
+            android:layout_width="40.0dip"
+            android:layout_height="40.0dip"
+            android:src="@drawable/baseline_delete_24"
+            android:backgroundTint="#ffef5350" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

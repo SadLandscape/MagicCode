@@ -3,8 +3,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.magic_code.models.AuthenticatedUser;
@@ -12,7 +10,6 @@ import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
 import com.example.magic_code.models.Member;
 import com.example.magic_code.models.Note;
-import com.example.magic_code.models.Settings;
 import com.example.magic_code.models.ShareToken;
 import com.example.magic_code.models.User;
 import com.google.gson.Gson;
@@ -30,12 +27,8 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -314,6 +307,24 @@ public class API {
                         Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
                     }
                 });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
+            return true;
+        }
+        public static boolean deleteToken(String tokenId,String authToken,Context ctx){
+            Object[] response = makeRequest("/api/tokens/"+tokenId+"/delete","DELETE",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show());
                 return false;
             }
             HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {

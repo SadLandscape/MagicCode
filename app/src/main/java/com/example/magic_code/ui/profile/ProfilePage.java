@@ -1,5 +1,6 @@
 package com.example.magic_code.ui.profile;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
@@ -31,6 +32,7 @@ public class ProfilePage extends Fragment {
     private String authToken;
     private SharedPreferences sharedPreferences;
     private AuthenticatedUser currentUser;
+    private FragmentActivity activity;
 
     public static ProfilePage newInstance() {
         return new ProfilePage();
@@ -40,9 +42,9 @@ public class ProfilePage extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.profile, container, false);
-        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        currentUser = API.Authentication.getUser(authToken,getContext());
+        currentUser = API.Authentication.getUser(authToken,activity);
         ((TextView) view.findViewById(R.id.text_username)).setText(currentUser.getUsername());
         ((TextView) view.findViewById(R.id.text_email)).setText(currentUser.getEmail());
         ((Button) view.findViewById(R.id.button_logout)).setOnClickListener(new View.OnClickListener() {
@@ -51,7 +53,7 @@ public class ProfilePage extends Fragment {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("authToken","");
                 editor.apply();
-                Intent intent = new Intent(getContext(), MainActivity.class);
+                Intent intent = new Intent(activity, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
@@ -72,6 +74,11 @@ public class ProfilePage extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(ProfilePageViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 
 }

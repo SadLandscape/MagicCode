@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Category implements Parcelable {
+public class Category implements Parcelable,Serializable{
     String title;
     String id;
     String author;

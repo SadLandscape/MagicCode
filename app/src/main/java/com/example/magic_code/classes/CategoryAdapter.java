@@ -45,7 +45,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     @NonNull
     @Override
     public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        View view = LayoutInflater.from(ctx)
                 .inflate(R.layout.cardview_category, parent, false);
         return new CategoryViewHolder(view);
     }
@@ -60,7 +60,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         if (board.canEdit()) {
             holder.categoryTitleTextView.setOnLongClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(ctx, holder.itemView);
-                popupMenu.getMenuInflater().inflate(R.menu.delete_menu, popupMenu.getMenu());
+                popupMenu.getMenuInflater().inflate(R.menu.delete_category_menu, popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(item -> {
                     if (item.getItemId() == R.id.menu_delete) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);

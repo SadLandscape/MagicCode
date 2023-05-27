@@ -1,10 +1,11 @@
 package com.example.magic_code.ui.register;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,14 +14,12 @@ import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.magic_code.R;
@@ -34,13 +33,14 @@ public class RegisterFragment extends Fragment {
     private String authToken;
     Pattern pattern;
     Pattern emptyPattern;
+    private FragmentActivity activity;
 
     public static RegisterFragment newInstance() {
         return new RegisterFragment();
     }
 
     public boolean checkValues(String username,String email,String password,String password2){
-        return username.isEmpty() || pattern.matcher(username).find() || !Patterns.EMAIL_ADDRESS.matcher(email).matches() || !password.equals(password2) || password.length() < 5 || password.matches("\\s+");
+        return !username.isEmpty() && !pattern.matcher(username).find() && Patterns.EMAIL_ADDRESS.matcher(email).matches() && password.equals(password2) && password.length() >= 5 && !password.matches("\\s+");
     }
 
     @Override
@@ -79,7 +79,7 @@ public class RegisterFragment extends Fragment {
                     }
                     secondPassword_Edit.setError("Passwords do not match");
                 }
-                if (!checkValues(username_edit.getText().toString(),email_edit.getText().toString(),password1,password2)) {
+                if (checkValues(username_edit.getText().toString(), email_edit.getText().toString(), password1, password2)) {
                     secondPassword_Edit.setError(null);
                     registerButton.setEnabled(true);
                 }
@@ -107,38 +107,29 @@ public class RegisterFragment extends Fragment {
                     registerButton.setEnabled(false);
                     return;
                 }
-                if (!registerButton.isEnabled() && !checkValues(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),secondPassword_Edit.getText().toString())) {
+                if (!registerButton.isEnabled() && checkValues(username_edit.getText().toString(), email_edit.getText().toString(), password_Edit.getText().toString(), secondPassword_Edit.getText().toString())) {
                     registerButton.setEnabled(true);
                 }
                 username_edit.setError(null);
             }
         });
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                registerButton.setEnabled(false);
-                root_view.findViewById(R.id.progressBar1).setVisibility(View.VISIBLE);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        authToken = API.Authentication.register(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),getContext());
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                root_view.findViewById(R.id.progressBar1).setVisibility(View.GONE);
-                                registerButton.setEnabled(true);
-                                if (authToken == null){
-                                    return;
-                                }
-                                Intent intent = new Intent();
-                                intent.putExtra("authToken",authToken);
-                                getActivity().setResult(Activity.RESULT_OK,intent);
-                                getActivity().finish();
-                            }
-                        });
+        registerButton.setOnClickListener(view -> {
+            registerButton.setEnabled(false);
+            root_view.findViewById(R.id.progressBar1).setVisibility(View.VISIBLE);
+            new Thread(() -> {
+                authToken = API.Authentication.register(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),activity);
+                activity.runOnUiThread(() -> {
+                    root_view.findViewById(R.id.progressBar1).setVisibility(View.GONE);
+                    registerButton.setEnabled(true);
+                    if (authToken == null){
+                        return;
                     }
-                }).start();
-            }
+                    Intent intent = new Intent();
+                    intent.putExtra("authToken",authToken);
+                    activity.setResult(Activity.RESULT_OK,intent);
+                    activity.finish();
+                });
+            }).start();
         });
         email_edit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -153,7 +144,7 @@ public class RegisterFragment extends Fragment {
                     registerButton.setEnabled(false);
                     return;
                 }
-                if (!checkValues(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),secondPassword_Edit.getText().toString())) {
+                if (checkValues(username_edit.getText().toString(), email_edit.getText().toString(), password_Edit.getText().toString(), secondPassword_Edit.getText().toString())) {
                     email_edit.setError(null);
                 }
 
@@ -164,43 +155,34 @@ public class RegisterFragment extends Fragment {
 
             }
         });
-        checkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                checkButton.setEnabled(false);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        boolean[] resp = API.Authentication.checkUsername(username_edit.getText().toString());
-                        boolean status = resp[0];
-                        boolean isUsernameValid = resp[1];
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                checkButton.setEnabled(true);
-                                if (!isUsernameValid && status){
-                                    username_edit.setError("Username already taken");
-                                    registerButton.setEnabled(false);
-                                    return;
-                                }
-                                if (!status) {
-                                    username_edit.setError("Unable to check username");
-                                    if (!checkValues(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),secondPassword_Edit.getText().toString()) && !registerButton.isEnabled()){
-                                        registerButton.setEnabled(true);
-                                    }
-                                    return;
-
-                                }
-                                username_edit.setError(null);
-                                Toast.makeText(getContext(), "Username valid!", Toast.LENGTH_SHORT).show();
-                                if (!checkValues(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),secondPassword_Edit.getText().toString())){
-                                    registerButton.setEnabled(true);
-                                }
-                            }
-                        });
+        checkButton.setOnClickListener(view -> {
+            checkButton.setEnabled(false);
+            new Thread(() -> {
+                boolean[] resp = API.Authentication.checkUsername(username_edit.getText().toString());
+                boolean status = resp[0];
+                boolean isUsernameValid = resp[1];
+                activity.runOnUiThread(() -> {
+                    checkButton.setEnabled(true);
+                    if (!isUsernameValid && status){
+                        username_edit.setError("Username already taken");
+                        registerButton.setEnabled(false);
+                        return;
                     }
-                }).start();
-            }
+                    if (!status) {
+                        username_edit.setError("Unable to check username");
+                        if (checkValues(username_edit.getText().toString(), email_edit.getText().toString(), password_Edit.getText().toString(), secondPassword_Edit.getText().toString()) && !registerButton.isEnabled()){
+                            registerButton.setEnabled(true);
+                        }
+                        return;
+
+                    }
+                    username_edit.setError(null);
+                    Toast.makeText(activity, "Username valid!", Toast.LENGTH_SHORT).show();
+                    if (checkValues(username_edit.getText().toString(), email_edit.getText().toString(), password_Edit.getText().toString(), secondPassword_Edit.getText().toString())){
+                        registerButton.setEnabled(true);
+                    }
+                });
+            }).start();
         });
         return root_view;
     }
@@ -210,6 +192,11 @@ public class RegisterFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 
 }

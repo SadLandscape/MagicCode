@@ -1,93 +1,54 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/board_title_input"
-        android:layout_width="0dp"
+        android:layout_width="0.0dip"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:hint="Board Title"
-        app:layout_constraintEnd_toStartOf="@+id/save_button"
+        android:layout_marginTop="8.0dip"
+         android:hint="Board Title"
+        android:layout_marginEnd="3.0dip"
+        app:layout_constraintEnd_toStartOf="@id/save_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_default="percent"
         app:layout_constraintWidth_percent="0.8">
-
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/title_board_edittext"
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
-            android:inputType="text" />
+            android:inputType="text"
+            android:imeOptions="actionNext" />
     </com.google.android.material.textfield.TextInputLayout>
-
     <Button
         android:id="@+id/save_button"
-        android:layout_width="0dp"
+        android:layout_width="0.0dip"
         android:layout_height="wrap_content"
-        android:layout_marginStart="3dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="8.0dip"
         android:text="Save"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.1"
-        app:layout_constraintStart_toEndOf="@+id/board_title_input"
+        android:layout_marginStart="2.0dip"
+        app:layout_constraintStart_toEndOf="@id/board_title_input"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/users_label"
-        android:layout_width="0dp"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/board_tab_layout"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="16dp"
-        android:text="Board members"
-        android:textColor="#000000"
-        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/board_title_input" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/users_recyclerview"
-        android:layout_width="404dp"
-        android:layout_height="219dp"
-        android:layout_marginBottom="16dp"
-        android:background="@color/material_dynamic_neutral80"
-        android:padding="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/tokens_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/users_label" />
-
-    <TextView
-        android:id="@+id/tokens_label"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="16dp"
-        android:text="QR Codes"
-        android:textColor="#000000"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/users_recyclerview" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/qr_recycler_view"
-        android:layout_width="404dp"
-        android:layout_height="219dp"
-        android:layout_marginBottom="98dp"
-        android:padding="16dp"
-        android:background="@color/material_dynamic_neutral80"
+        app:layout_constraintTop_toBottomOf="@id/board_title_input"
+        app:tabGravity="fill"
+        app:tabMode="fixed" />
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/board_view_pager"
+        android:layout_width="fill_parent"
+        android:layout_height="0.0dip"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tokens_label" />
-
+        app:layout_constraintTop_toBottomOf="@id/board_tab_layout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.example.magic_code.ui.noteView;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -48,6 +50,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 public class NoteFragment extends Fragment {
 
     private String note_id;
+    private FragmentActivity activity;
 
     public static NoteFragment newInstance(String note_id, Boolean canEdit, Board board) {
         NoteFragment fragment = new NoteFragment();
@@ -106,8 +109,8 @@ public class NoteFragment extends Fragment {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            API.Notes.setBody(note_id,noteText,authToken,getContext());
-                            requireActivity().runOnUiThread(new Runnable() {
+                            API.Notes.setBody(note_id,noteText,authToken,activity);
+                            activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     progressBar.setVisibility(View.GONE);
@@ -136,39 +139,33 @@ public class NoteFragment extends Fragment {
         setHasOptionsMenu(true);
         canEdit = getArguments().getBoolean("canEdit");
         board = (Board) getArguments().getSerializable("board");
-        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", activity.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        imm = ContextCompat.getSystemService(requireContext(), InputMethodManager.class);
+        imm = ContextCompat.getSystemService(activity, InputMethodManager.class);
         renderer = HtmlRenderer.builder().build();
         parser = Parser.builder().build();
-        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         note_id = getArguments().getString("note_id");
         View root_view = inflater.inflate(R.layout.noteview, container, false);
         noteDescription = (EditText) root_view.findViewById(R.id.note_text);
         progressBar = root_view.findViewById(R.id.progressBar2);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                note = API.Notes.getNote(note_id,authToken,getContext());
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (note == null){
-                            Navigation.findNavController(requireView()).navigateUp();
-                            return;
-                        }
-                        ((MainActivity) requireActivity()).setActionBarTitle(note.getTitle());
-                        progressBar.setVisibility(View.GONE);
-                        if (noteText == null && note!=null) {
-                            noteText = note.getText();
-                        }
-                        noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
-                        noteDescription.setFocusable(false);
-                        noteDescription.setFocusableInTouchMode(false);
-                        noteDescription.setClickable(false);
-                    }
-                });
-            }
+        new Thread(() -> {
+            note = API.Notes.getNote(note_id,authToken,activity);
+            activity.runOnUiThread(() -> {
+                if (note == null){
+                    Navigation.findNavController(requireView()).navigateUp();
+                    return;
+                }
+                ((MainActivity) activity).setActionBarTitle(note.getTitle());
+                progressBar.setVisibility(View.GONE);
+                if (noteText == null && note!=null) {
+                    noteText = note.getText();
+                }
+                noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
+                noteDescription.setFocusable(false);
+                noteDescription.setFocusableInTouchMode(false);
+                noteDescription.setClickable(false);
+            });
         }).start();
         return root_view;
     }
@@ -176,7 +173,7 @@ public class NoteFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        BottomNavigationView bottomNavigationView = requireActivity().findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
         MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
         menuItem.setChecked(true);
     }
@@ -184,5 +181,10 @@ public class NoteFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 }

@@ -1,11 +1,10 @@
 package com.example.magic_code.ui.boardView;
 
-import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
-
-import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -21,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -35,7 +33,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +45,6 @@ import com.example.magic_code.models.Category;
 import com.example.magic_code.models.ShareToken;
 import com.example.magic_code.ui.createNote.createNote;
 import com.example.magic_code.ui.manageBoard.manageBoard;
-import com.example.magic_code.ui.noteSettings.NoteSettings;
 import com.example.magic_code.utils.MediaStoreSupport;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.zxing.BarcodeFormat;
@@ -69,6 +65,7 @@ public class boardView extends Fragment {
     Board board;
     SwipeRefreshLayout refreshLayout;
     String board_id;
+    private FragmentActivity activity;
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -80,25 +77,14 @@ public class boardView extends Fragment {
         if (board.canEdit() && !board.canDelete()){
             menu.findItem(R.id.manageBoardOption).setVisible(false);
         }
-        menuItemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ArrayList<Category> categories = API.Categories.getCategories(board_id,authToken,requireContext());
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                createNote fragment = createNote.newInstance(categories);
-                                NavController navController = Navigation.findNavController(requireView());
-                                navController.navigate(R.id.action_board_view_to_create_notes,fragment.getArguments());
-                            }
-                        });
-                    }
-                }).start();
-            }
-        });
+        menuItemView.setOnClickListener(v -> new Thread(() -> {
+            ArrayList<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
+            activity.runOnUiThread(() -> {
+                createNote fragment = createNote.newInstance(categories);
+                NavController navController = Navigation.findNavController(requireView());
+                navController.navigate(R.id.action_board_view_to_create_notes,fragment.getArguments());
+            });
+        }).start());
         super.onCreateOptionsMenu(menu,inflater);
     }
 
@@ -117,7 +103,7 @@ public class boardView extends Fragment {
             return true;
         }
         if (item.getItemId() == R.id.shareOption){
-            final Dialog dialog = new Dialog(getActivity());
+            final Dialog dialog = new Dialog(activity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setContentView(R.layout.dialog_qr_generate);
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -126,66 +112,49 @@ public class boardView extends Fragment {
             lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setAttributes(lp);
             SwitchCompat readOnly = dialog.findViewById(R.id.switch_read_only);
-            dialog.findViewById(R.id.button_generate).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    view.setEnabled(false);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ShareToken newToken = API.Boards.generateToken(board_id,authToken,readOnly.isChecked(),requireContext());
-                            if (newToken == null){
-                                return;
-                            }
-                            requireActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    view.setEnabled(true);
-                                    dialog.dismiss();
-                                    int size = 500;
-                                    BitMatrix bitMatrix = null;
-                                    try {
-                                        bitMatrix = new MultiFormatWriter().encode(newToken.getId(), BarcodeFormat.QR_CODE, size, size);
-                                    } catch (WriterException e) {
-                                        Toast.makeText(getActivity(), "Unable to share: "+e, Toast.LENGTH_SHORT).show();
-                                    }
-                                    int width = bitMatrix.getWidth();
-                                    int height = bitMatrix.getHeight();
-                                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                                    for (int x = 0; x < width; x++) {
-                                        for (int y = 0; y < height; y++) {
-                                            bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
-                                        }
-                                    }
-                                    final Dialog dialog1 = new Dialog(getActivity());
-                                    dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                    dialog1.setContentView(R.layout.dialog_qr_code);
-                                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                                    lp.copyFrom(dialog1.getWindow().getAttributes());
-                                    lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
-                                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                                    ImageView imageView = dialog1.findViewById(R.id.image_view_qr_code);
-                                    dialog1.getWindow().setAttributes(lp);
-                                    dialog1.findViewById(R.id.button_close).setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            dialog1.dismiss();
-                                        }
-                                    });
-                                    dialog1.findViewById(R.id.button_save).setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View view) {
-                                            MediaStoreSupport.saveImageToGallery(bitmap,"note",getContext());
-                                            dialog1.dismiss();
-                                        }
-                                    });
-                                    imageView.setImageBitmap(bitmap);
-                                    dialog1.show();
-                                }
-                            });
+            dialog.findViewById(R.id.button_generate).setOnClickListener(view -> {
+                view.setEnabled(false);
+                new Thread(() -> {
+                    ShareToken newToken = API.Boards.generateToken(board_id,authToken,readOnly.isChecked(),activity);
+                    if (newToken == null){
+                        return;
+                    }
+                    activity.runOnUiThread(() -> {
+                        view.setEnabled(true);
+                        dialog.dismiss();
+                        int size = 500;
+                        BitMatrix bitMatrix = null;
+                        try {
+                            bitMatrix = new MultiFormatWriter().encode(newToken.getId(), BarcodeFormat.QR_CODE, size, size);
+                        } catch (WriterException e) {
+                            Toast.makeText(activity, "Unable to share: "+e, Toast.LENGTH_SHORT).show();
                         }
-                    }).start();
-                }
+                        int width = bitMatrix.getWidth();
+                        int height = bitMatrix.getHeight();
+                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                        for (int x = 0; x < width; x++) {
+                            for (int y = 0; y < height; y++) {
+                                bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                            }
+                        }
+                        final Dialog dialog1 = new Dialog(activity);
+                        dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        dialog1.setContentView(R.layout.dialog_qr_code);
+                        WindowManager.LayoutParams lp1 = new WindowManager.LayoutParams();
+                        lp1.copyFrom(dialog1.getWindow().getAttributes());
+                        lp1.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
+                        lp1.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                        ImageView imageView = dialog1.findViewById(R.id.image_view_qr_code);
+                        dialog1.getWindow().setAttributes(lp1);
+                        dialog1.findViewById(R.id.button_close).setOnClickListener(v -> dialog1.dismiss());
+                        dialog1.findViewById(R.id.button_save).setOnClickListener(view1 -> {
+                            MediaStoreSupport.saveImageToGallery(bitmap,"note",activity);
+                            dialog1.dismiss();
+                        });
+                        imageView.setImageBitmap(bitmap);
+                        dialog1.show();
+                    });
+                }).start();
             });
             dialog.show();
             return true;
@@ -203,119 +172,83 @@ public class boardView extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        dialog = new Dialog(getContext());
+        dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_loading);
         dialog.setCancelable(false);
         ((TextView)dialog.findViewById(R.id.status_text)).setText("Loading board...");
         dialog.show();
-        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", activity.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         board = ((Board)getArguments().getSerializable("board"));
         board_id = board.getId();
         View root_view = inflater.inflate(R.layout.fragment_board_view, container, false);
-        ((MainActivity) requireActivity()).setActionBarTitle(board.getTitle());
+        ((MainActivity) activity).setActionBarTitle(board.getTitle());
         RecyclerView recyclerView = root_view.findViewById(R.id.category_recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                List<Category> categories = API.Categories.getCategories(board_id,authToken,requireContext());
-                requireActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter = new CategoryAdapter(categories,board,getContext(),authToken);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                        recyclerView.setAdapter(adapter);
-                        dialog.dismiss();
-                    }
-                });
-            }
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        new Thread(() -> {
+            List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
+            activity.runOnUiThread(() -> {
+                adapter = new CategoryAdapter(categories,board,activity,authToken);
+                recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+                recyclerView.setAdapter(adapter);
+                dialog.dismiss();
+            });
         }).start();
         refreshLayout = root_view.findViewById(R.id.category_refresh);
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        List<Category> categories = API.Categories.getCategories(board_id,authToken,requireContext());
-                        requireActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                adapter.updateData(categories);
-                                refreshLayout.setRefreshing(false);
-                            }
-                        });
-                    }
-                }).start();
-            }
-        });
+        refreshLayout.setOnRefreshListener(() -> new Thread(() -> {
+            List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
+            activity.runOnUiThread(() -> {
+                adapter.updateData(categories);
+                refreshLayout.setRefreshing(false);
+            });
+        }).start());
         if (!board.canEdit()) {
             root_view.findViewById(R.id.create_category_button).setVisibility(View.GONE);
         }
-        root_view.findViewById(R.id.create_category_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Dialog dialog = new Dialog(getContext());
-                dialog.setContentView(R.layout.new_category_dialog);
-                Button confirm_button = dialog.findViewById(R.id.new_category_dialog_create_button);
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                lp.copyFrom(dialog.getWindow().getAttributes());
-                lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.8);
-                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                dialog.getWindow().setAttributes(lp);
-                EditText title_edit =  ((EditText) dialog.findViewById(R.id.new_category_dialog_category_title));
-                confirm_button.setEnabled(false);
-               title_edit.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        root_view.findViewById(R.id.create_category_button).setOnClickListener(view -> {
+            Dialog dialog = new Dialog(activity);
+            dialog.setContentView(R.layout.new_category_dialog);
+            Button confirm_button = dialog.findViewById(R.id.new_category_dialog_create_button);
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.8);
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(lp);
+            EditText title_edit =  ((EditText) dialog.findViewById(R.id.new_category_dialog_category_title));
+            confirm_button.setEnabled(false);
+           title_edit.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    if (title_edit.getText().toString().length() >= 3 && !TextUtils.isEmpty(title_edit.getText().toString().trim())){
+                        confirm_button.setEnabled(true);
+                        title_edit.setError(null);
                     }
-
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        if (title_edit.getText().toString().length() >= 3 && !TextUtils.isEmpty(title_edit.getText().toString().trim())){
-                            confirm_button.setEnabled(true);
-                            title_edit.setError(null);
-                        }
-                        else {
-                            confirm_button.setEnabled(false);
-                            title_edit.setError("Title must be at least 3 letters long!");
-                        }
+                    else {
+                        confirm_button.setEnabled(false);
+                        title_edit.setError("Title must be at least 3 letters long!");
                     }
+                }
 
-                    @Override
-                    public void afterTextChanged(Editable editable) {
+                @Override
+                public void afterTextChanged(Editable editable) {
 
-                    }
+                }
+            });
+            confirm_button.setOnClickListener(view12 -> new Thread(() -> {
+                API.Categories.createCategory(board_id,((EditText)dialog.findViewById(R.id.new_category_dialog_category_title)).getText().toString(),authToken,activity);
+                List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
+                activity.runOnUiThread(() -> {
+                    adapter.updateData(categories);
+                    dialog.dismiss();
                 });
-                confirm_button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                API.Categories.createCategory(board_id,((EditText)dialog.findViewById(R.id.new_category_dialog_category_title)).getText().toString(),authToken,requireContext());
-                                List<Category> categories = API.Categories.getCategories(board_id,authToken,requireContext());
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        adapter.updateData(categories);
-                                        dialog.dismiss();
-                                    }
-                                });
-                            }
-                        }).start();
-                    }
-                });
-                dialog.findViewById(R.id.new_category_dialog_cancel_button).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
-            }
+            }).start());
+            dialog.findViewById(R.id.new_category_dialog_cancel_button).setOnClickListener(view1 -> dialog.dismiss());
+            dialog.show();
         });
         return root_view;
     }
@@ -327,9 +260,14 @@ public class boardView extends Fragment {
         // TODO: Use the ViewModel
     }
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
+    }
+    @Override
     public void onResume() {
         super.onResume();
-        BottomNavigationView bottomNavigationView = requireActivity().findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
         MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
         menuItem.setChecked(true);
     }

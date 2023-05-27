@@ -1,7 +1,9 @@
 package com.example.magic_code.ui.createBoard;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -28,6 +30,7 @@ public class boardCreate extends Fragment {
     private BoardCreateViewModel mViewModel;
     String authToken;
     SharedPreferences sharedPreferences;
+    private FragmentActivity activity;
 
     public static boardCreate newInstance() {
         return new boardCreate();
@@ -46,7 +49,7 @@ public class boardCreate extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", activity.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         View root_view = inflater.inflate(R.layout.fragment_board_create, container, false);
         EditText editText = root_view.findViewById(R.id.board_title);
@@ -75,23 +78,10 @@ public class boardCreate extends Fragment {
 
             }
         });
-        createButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        API.Boards.createBoard(((EditText)root_view.findViewById(R.id.board_title)).getText().toString(),authToken,getContext());
-                        requireActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Navigation.findNavController(requireView()).navigateUp();
-                            }
-                        });
-                    }
-                }).start();
-            }
-        });
+        createButton.setOnClickListener(view -> new Thread(() -> {
+            API.Boards.createBoard(((EditText)root_view.findViewById(R.id.board_title)).getText().toString(),authToken,activity);
+            activity.runOnUiThread(() -> Navigation.findNavController(requireView()).navigateUp());
+        }).start());
         return root_view;
     }
 
@@ -100,6 +90,11 @@ public class boardCreate extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(BoardCreateViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 
 }

@@ -1,6 +1,9 @@
 package com.example.magic_code.ui.noteSettings;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
+
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -37,6 +40,7 @@ public class NoteSettings extends Fragment {
     private SharedPreferences sharedPreferences;
     private Category selectedCategory;
     private String authToken;
+    private FragmentActivity activity;
 
     public static NoteSettings newInstance(String note_id, Board board) {
         NoteSettings fragment = new NoteSettings();
@@ -58,7 +62,7 @@ public class NoteSettings extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         note_id = getArguments().getString("note_id");
         board = (Board) getArguments().getSerializable("board");
@@ -89,30 +93,25 @@ public class NoteSettings extends Fragment {
             }
         });
         new Thread(()-> {
-            note = API.Notes.getNote(note_id,authToken,requireContext());
-            List<Category> categories = API.Categories.getCategories(board.getId(),authToken,requireContext());
+            note = API.Notes.getNote(note_id,authToken,activity);
+            List<Category> categories = API.Categories.getCategories(board.getId(),authToken,activity);
             selectedCategory = note.getCategory();
-            requireActivity().runOnUiThread(() -> {
+            activity.runOnUiThread(() -> {
                 List<String> categoryNames = new ArrayList<>();
                 for (Category category : categories) {
                     categoryNames.add(category.getTitle());
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, categoryNames);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_dropdown_item_1line, categoryNames);
                 MaterialAutoCompleteTextView categoryDropdown = view.findViewById(R.id.choose_category_dropdown);
                 categoryDropdown.setText(note.getCategory().getTitle());
                 categoryDropdown.setAdapter(adapter);
                 categoryDropdown.setOnItemClickListener((parent, view1, position, id) -> selectedCategory = categories.get(position));
-                saveBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        new Thread(()->{
-                            API.Notes.updateNote(note_id,title_edit.getText().toString(),selectedCategory,authToken,requireContext());
-                            requireActivity().runOnUiThread(()->{
-                                Navigation.findNavController(requireView()).navigateUp();
-                            });
-                        }).start();
-                    }
-                });
+                saveBtn.setOnClickListener(view12 -> new Thread(()->{
+                    API.Notes.updateNote(note_id,title_edit.getText().toString(),selectedCategory,authToken,activity);
+                    activity.runOnUiThread(()->{
+                        Navigation.findNavController(requireView()).navigateUp();
+                    });
+                }).start());
                 ((TextView)view.findViewById(R.id.title_edittext)).setText(note.getTitle());
             });
         }).start();
@@ -122,7 +121,7 @@ public class NoteSettings extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        BottomNavigationView bottomNavigationView = (getActivity()).findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
         MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
         menuItem.setChecked(true);
     }
@@ -132,6 +131,11 @@ public class NoteSettings extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(NoteSettingsViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 
 }

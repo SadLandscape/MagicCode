@@ -43,59 +43,43 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.BoardViewHol
         public void bind(final Board board, final OnItemClickListener listener) {
             titleTextView.setText(board.getTitle());
             authorTextView.setText(board.getAuthor());
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    PopupMenu popupMenu = new PopupMenu(ctx,itemView);
-                    popupMenu.getMenuInflater().inflate(R.menu.delete_menu, popupMenu.getMenu());
-                    popupMenu.getMenu().findItem(R.id.menu_delete).setTitle(board.canDelete() ? "Delete" : "Leave");
+            itemView.setOnLongClickListener(v -> {
+                PopupMenu popupMenu = new PopupMenu(ctx,itemView);
+                popupMenu.getMenuInflater().inflate(R.menu.delete_menu, popupMenu.getMenu());
+                popupMenu.getMenu().findItem(R.id.menu_delete).setTitle(board.canDelete() ? "Delete" : "Leave");
 
-                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            if (item.getItemId() == R.id.menu_delete) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-                                builder.setTitle(board.canDelete() ? "Delete Board" : "Leave Board");
-                                builder.setMessage("Are you sure you want to " +(board.canDelete() ?"delete":"leave")+" this board?");
-                                builder.setPositiveButton(board.canDelete() ?"Delete" : "Leave", new DialogInterface.OnClickListener() {
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    if (item.getItemId() == R.id.menu_delete) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+                        builder.setTitle(board.canDelete() ? "Delete Board" : "Leave Board");
+                        builder.setMessage("Are you sure you want to " +(board.canDelete() ?"delete":"leave")+" this board?");
+                        builder.setPositiveButton(board.canDelete() ?"Delete" : "Leave", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                new Thread(new Runnable() {
                                     @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        new Thread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                boolean status = board.canDelete() ? API.Boards.deleteBoard(board.getId(),authToken,ctx) : API.Boards.leaveBoard(board.getId(),authToken,ctx);
-                                                if (status) {
-                                                    BoardAdapter.this.boards.remove(board);
-                                                }
-                                                ((Activity) ctx).runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        notifyDataSetChanged();
-                                                    }
-                                                });
-                                            }
-                                        }).start();
+                                    public void run() {
+                                        boolean status = board.canDelete() ? API.Boards.deleteBoard(board.getId(),authToken,ctx) : API.Boards.leaveBoard(board.getId(),authToken,ctx);
+                                        if (status) {
+                                            boards.remove(board);
+                                        }
+                                        ((Activity) ctx).runOnUiThread(BoardAdapter.this::notifyDataSetChanged);
                                     }
-                                });
-                                builder.setNegativeButton("Cancel", null);
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
-                                return true;
+                                }).start();
                             }
-                            return false;
-                        }
-                    });
-                    popupMenu.show();
+                        });
+                        builder.setNegativeButton("Cancel", null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        return true;
+                    }
+                    return false;
+                });
+                popupMenu.show();
 
-                    return true;
-                }
+                return true;
             });
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onItemClick(board);
-                }
-            });
+            itemView.setOnClickListener(v -> listener.onItemClick(board));
         }
     }
 
@@ -108,7 +92,7 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.BoardViewHol
 
     @Override
     public BoardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.board_item, parent, false);
+        View view = LayoutInflater.from(ctx).inflate(R.layout.board_item, parent, false);
         return new BoardViewHolder(view);
     }
 

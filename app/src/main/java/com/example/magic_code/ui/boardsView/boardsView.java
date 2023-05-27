@@ -1,8 +1,10 @@
 package com.example.magic_code.ui.boardsView;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -38,6 +40,7 @@ public class boardsView extends Fragment {
     BoardAdapter adapter;
     Dialog dialog;
     SharedPreferences sharedPreferences;
+    private FragmentActivity activity;
 
     public static boardsView newInstance() {
         return new boardsView();
@@ -47,20 +50,20 @@ public class boardsView extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        dialog = new Dialog(getContext());
+        dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_loading);
         dialog.setCancelable(false);
         ((TextView)dialog.findViewById(R.id.status_text)).setText("Loading boards...");
         dialog.show();
-        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", activity.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         View root_view = inflater.inflate(R.layout.fragment_boards_view, container, false);
         SwipeRefreshLayout refreshLayout = root_view.findViewById(R.id.board_refresh);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<Board> boardList = API.Boards.getBoards(authToken,getContext());
-                getActivity().runOnUiThread(new Runnable() {
+                List<Board> boardList = API.Boards.getBoards(authToken,activity);
+                activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         dialog.dismiss();
@@ -71,10 +74,10 @@ public class boardsView extends Fragment {
                                 NavController navController = Navigation.findNavController(requireView());
                                 navController.navigate(R.id.action_boards_to_board_view,fragment.getArguments());
                             }
-                        },authToken,requireContext());
+                        },authToken,activity);
 
                         RecyclerView recyclerView = root_view.findViewById(R.id.board_recyclerView);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
                         recyclerView.setAdapter(adapter);
                     }
                 });
@@ -86,8 +89,8 @@ public class boardsView extends Fragment {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        List<Board> boardList = API.Boards.getBoards(authToken,getContext());
-                        getActivity().runOnUiThread(new Runnable() {
+                        List<Board> boardList = API.Boards.getBoards(authToken,activity);
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 adapter.updateData(boardList);
@@ -115,6 +118,11 @@ public class boardsView extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(BoardsViewViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 
 

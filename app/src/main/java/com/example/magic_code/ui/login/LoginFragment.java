@@ -1,9 +1,11 @@
 package com.example.magic_code.ui.login;
 
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -13,7 +15,6 @@ import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,13 +27,13 @@ import android.widget.EditText;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
 
-import java.util.regex.Pattern;
-
 public class LoginFragment extends Fragment {
 
     private LoginViewModel mViewModel;
     private String authToken;
     private InputMethodManager imm;
+    private FragmentActivity activity;
+
     public static LoginFragment newInstance() {
         return new LoginFragment();
     }
@@ -40,8 +41,8 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        imm = ContextCompat.getSystemService(requireContext(), InputMethodManager.class);
-        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        imm = ContextCompat.getSystemService(activity, InputMethodManager.class);
+        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         View rootivew = inflater.inflate(R.layout.fragment_login, container, false);
         EditText email_entry = ((EditText) rootivew.findViewById(R.id.email_edittext));
         EditText password_entry = ((EditText) rootivew.findViewById(R.id.password_edittext));
@@ -75,34 +76,25 @@ public class LoginFragment extends Fragment {
         };
         password_entry.addTextChangedListener(watcher);
         email_entry.addTextChangedListener(watcher);
-        login_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                login_btn.setEnabled(false);
-                imm.hideSoftInputFromWindow(rootivew.getWindowToken(),0);
-                rootivew.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        authToken = API.Authentication.login(email_entry.getText().toString(),password_entry.getText().toString(),getContext());
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                rootivew.findViewById(R.id.progressBar).setVisibility(View.GONE);
-                                login_btn.setEnabled(true);
-                                if (authToken == null){
-                                    password_entry.setText("");
-                                    return;
-                                }
-                                Intent intent = new Intent();
-                                intent.putExtra("authToken",authToken);
-                                getActivity().setResult(Activity.RESULT_OK,intent);
-                                getActivity().finish();
-                            }
-                        });
+        login_btn.setOnClickListener(view -> {
+            login_btn.setEnabled(false);
+            imm.hideSoftInputFromWindow(rootivew.getWindowToken(),0);
+            rootivew.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+            new Thread(() -> {
+                authToken = API.Authentication.login(email_entry.getText().toString(),password_entry.getText().toString(),activity);
+                activity.runOnUiThread(() -> {
+                    rootivew.findViewById(R.id.progressBar).setVisibility(View.GONE);
+                    login_btn.setEnabled(true);
+                    if (authToken == null){
+                        password_entry.setText("");
+                        return;
                     }
-                }).start();
-            }
+                    Intent intent = new Intent();
+                    intent.putExtra("authToken",authToken);
+                    activity.setResult(Activity.RESULT_OK,intent);
+                    activity.finish();
+                });
+            }).start();
         });
         return rootivew;
     }
@@ -112,6 +104,11 @@ public class LoginFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 
 }

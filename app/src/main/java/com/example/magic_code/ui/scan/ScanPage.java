@@ -1,24 +1,24 @@
 package com.example.magic_code.ui.scan;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.example.magic_code.api.API;
 import com.google.zxing.BinaryBitmap;
@@ -38,13 +38,11 @@ import java.io.IOException;
 import java.util.List;
 
 public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchListener {
-
-    private static final String TAG = ScanPage.class.getSimpleName();
-
     private DecoratedBarcodeView barcodeView;
     private BeepManager beepManager;
     private String authToken;
     SharedPreferences sharedPreferences;
+    private FragmentActivity activity;
 
     public static ScanPage newInstance() {
         return new ScanPage();
@@ -54,11 +52,11 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        sharedPreferences = getActivity().getSharedPreferences("MagicPrefs", getContext().MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         View view = inflater.inflate(R.layout.scan, container, false);
         barcodeView = view.findViewById(R.id.barcode_scanner);
-        beepManager = new BeepManager(getActivity());
+        beepManager = new BeepManager(activity);
 
         barcodeView.setTorchListener(this);
 
@@ -66,7 +64,7 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         barcodeView.decodeSingle(callback);
         barcodeView.setStatusText("Please scan QR");
@@ -81,7 +79,7 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
             Uri imageUri = data.getData();
             Bitmap bitmap = null;
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+                bitmap = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), imageUri);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -100,13 +98,8 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
                 try {
                     Result result = reader.decode(binaryBitmap);
                     String contents = result.getText();
-                    Toast.makeText(requireContext(), "Checking QR...", Toast.LENGTH_SHORT).show();
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            API.Boards.joinBoard(contents,authToken,requireContext());
-                        }
-                    }).start();
+                    Toast.makeText(activity, "Checking QR...", Toast.LENGTH_SHORT).show();
+                    new Thread(() -> API.Boards.joinBoard(contents,authToken,activity)).start();
                 } catch (NotFoundException e) {
                     e.printStackTrace();
                 }
@@ -144,13 +137,8 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
         @Override
         public void barcodeResult(BarcodeResult result) {
             beepManager.playBeepSoundAndVibrate();
-            Toast.makeText(requireContext(), "Checking QR...", Toast.LENGTH_SHORT).show();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    API.Boards.joinBoard(result.getText(),authToken,requireContext());
-                }
-            }).start();
+            Toast.makeText(activity, "Checking QR...", Toast.LENGTH_SHORT).show();
+            new Thread(() -> API.Boards.joinBoard(result.getText(),authToken,activity)).start();
         }
 
         @Override
@@ -164,5 +152,10 @@ public class ScanPage extends Fragment implements DecoratedBarcodeView.TorchList
 
     @Override
     public void onTorchOff() {
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        this.activity = (FragmentActivity) context;
     }
 }
