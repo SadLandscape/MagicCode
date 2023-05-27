@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import com.example.magic_code.models.AuthenticatedUser;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
+import com.example.magic_code.models.Member;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.models.Settings;
 import com.example.magic_code.models.ShareToken;
@@ -371,6 +372,30 @@ public class API {
                 }
             });
             return true;
+        }
+
+        public static List<Member> getMembers(String board_id, String authToken, Context ctx) {
+            Object[] response = makeRequest("/api/boards/"+board_id+"/members","GET",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return new ArrayList<>();
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            List<Member> memberList = new ArrayList<>();
+            List<LinkedTreeMap<String,Object>> members = (List<LinkedTreeMap<String, Object>>) response_data.get("members");
+            for (LinkedTreeMap<String,Object> member: members) {
+                HashMap<String,Object> member_ = new HashMap<>(member);
+                memberList.add(new Member(member_,(String) response_data.get("selfId")));
+            }
+            return memberList;
         }
     }
 

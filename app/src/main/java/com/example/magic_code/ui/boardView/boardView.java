@@ -47,6 +47,8 @@ import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
 import com.example.magic_code.models.ShareToken;
 import com.example.magic_code.ui.createNote.createNote;
+import com.example.magic_code.ui.manageBoard.manageBoard;
+import com.example.magic_code.ui.noteSettings.NoteSettings;
 import com.example.magic_code.utils.MediaStoreSupport;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.zxing.BarcodeFormat;
@@ -75,6 +77,9 @@ public class boardView extends Fragment {
         }
         inflater.inflate(R.menu.board_menu, menu);
         View menuItemView = menu.findItem(R.id.create_note_button_menu).getActionView();
+        if (board.canEdit() && !board.canDelete()){
+            menu.findItem(R.id.manageBoardOption).setVisible(false);
+        }
         menuItemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -183,6 +188,12 @@ public class boardView extends Fragment {
                 }
             });
             dialog.show();
+            return true;
+        }
+        if (item.getItemId() == R.id.manageBoardOption){
+            manageBoard fragment = manageBoard.newInstance(board_id);
+            NavController navController = Navigation.findNavController(requireView());
+            navController.navigate(R.id.action_board_view_to_manageBoard,fragment.getArguments());
             return true;
         }
         return true;

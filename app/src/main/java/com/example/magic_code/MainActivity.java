@@ -83,6 +83,9 @@ public class MainActivity extends AppCompatActivity {
             authToken = data.getStringExtra("authToken");
             editor.putString("authToken",authToken);
             editor.apply();
+            finish();
+            Intent startIntent = new Intent(this,MainActivity.class);
+            startActivity(startIntent);
         }
     }
 

@@ -1,41 +1,30 @@
 package com.example.magic_code.ui.noteSettings;
 
 import androidx.lifecycle.ViewModelProvider;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
-import com.example.magic_code.classes.SettingsUserAdapter;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
 import com.example.magic_code.models.Note;
-import com.example.magic_code.models.Settings;
-import com.example.magic_code.models.User;
-import com.example.magic_code.ui.noteView.NoteFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
-
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +63,31 @@ public class NoteSettings extends Fragment {
         note_id = getArguments().getString("note_id");
         board = (Board) getArguments().getSerializable("board");
         View view = inflater.inflate(R.layout.fragment_note_settings, container, false);
+        Button saveBtn = view.findViewById(R.id.save_button);
         EditText title_edit = view.findViewById(R.id.title_edittext);
+        title_edit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String note_title = title_edit.getText().toString();
+                if (TextUtils.isEmpty(note_title)) {
+                    title_edit.setError("This field is required!");
+                    saveBtn.setEnabled(false);
+                } else {
+                    saveBtn.setEnabled(true);
+                    title_edit.setError(null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
         new Thread(()-> {
             note = API.Notes.getNote(note_id,authToken,requireContext());
             List<Category> categories = API.Categories.getCategories(board.getId(),authToken,requireContext());
@@ -89,7 +102,7 @@ public class NoteSettings extends Fragment {
                 categoryDropdown.setText(note.getCategory().getTitle());
                 categoryDropdown.setAdapter(adapter);
                 categoryDropdown.setOnItemClickListener((parent, view1, position, id) -> selectedCategory = categories.get(position));
-                view.findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener() {
+                saveBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         new Thread(()->{

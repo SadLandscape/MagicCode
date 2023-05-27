@@ -20,6 +20,10 @@
         android:name="com.example.magic_code.ui.scan.ScanPage"
         android:id="@+id/scan" />
     <fragment
+        android:label="Board Settings"
+        android:name="com.example.magic_code.ui.manageBoard.manageBoard"
+        android:id="@+id/manageBoard" />
+    <fragment
         android:label="Stories"
         android:name="com.example.magic_code.ui.stories.StoriesPage"
         android:id="@+id/stories" />
@@ -60,6 +64,9 @@
         <action
             android:id="@+id/action_board_view_to_create_notes"
             app:destination="@id/create_notes" />
+        <action
+            android:id="@+id/action_board_view_to_manageBoard"
+            app:destination="@id/manageBoard" />
     </fragment>
     <fragment
         android:label="Create Board"

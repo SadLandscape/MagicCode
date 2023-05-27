@@ -7,23 +7,22 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.magic_code.R;
+import com.example.magic_code.models.Member;
 import com.example.magic_code.models.Settings;
 import com.example.magic_code.models.User;
 
 import java.util.List;
 
-public class SettingsUserAdapter extends RecyclerView.Adapter<SettingsUserAdapter.UserViewHolder> {
+public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.UserViewHolder> {
 
-    private List<User> userList;
-    private Settings settings;
-    private OnUserRemoveClickListener removeClickListener = new OnUserRemoveClickListener();
+    private List<Member> memberList;
 
-    public SettingsUserAdapter(Settings settings) {
-        userList = settings.getUsers();
-        this.settings = settings;
+    public MemberAdapter(List<Member> members) {
+        memberList = members;
     }
 
     @NonNull
@@ -36,43 +35,28 @@ public class SettingsUserAdapter extends RecyclerView.Adapter<SettingsUserAdapte
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        User user = userList.get(position);
-        holder.userNameTextView.setText(user.getUsername());
-        holder.userEmailTextView.setText(user.getEmail());
+        Member member = memberList.get(position);
+        holder.userNameTextView.setText(member.getDisplayName());
+        holder.userEmailTextView.setText(member.getEmail());
+        holder.readOnlySwitch.setChecked(!member.getCanEdit());
 
-        holder.removeUserButton.setOnClickListener(view -> {
-            if (removeClickListener != null) {
-                removeClickListener.onUserRemoveClick(user);
-            }
-        });
     }
 
     @Override
     public int getItemCount() {
-        return userList.size();
-    }
-
-    public void setRemoveClickListener(OnUserRemoveClickListener removeClickListener) {
-        this.removeClickListener = removeClickListener;
+        return memberList.size();
     }
 
     public class UserViewHolder extends RecyclerView.ViewHolder {
         public TextView userNameTextView;
         public TextView userEmailTextView;
-        public ImageButton removeUserButton;
+        public SwitchCompat readOnlySwitch;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             userNameTextView = itemView.findViewById(R.id.user_name_textview);
             userEmailTextView = itemView.findViewById(R.id.user_email_textview);
-            removeUserButton = itemView.findViewById(R.id.remove_user_button);
-        }
-    }
-
-    public class OnUserRemoveClickListener {
-        void onUserRemoveClick(User user){
-            settings.removeUser(user);
-            notifyDataSetChanged();
+            readOnlySwitch = itemView.findViewById(R.id.switch_read_only);
         }
     }
 }
