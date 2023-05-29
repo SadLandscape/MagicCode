@@ -4,6 +4,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
+import android.app.AutomaticZenRule;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,10 +21,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.magic_code.AuthenticationActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
+import com.example.magic_code.ui.register.emailVerification.VerifyEmailActivity;
 
 import java.util.regex.Pattern;
 
@@ -33,7 +37,9 @@ public class RegisterFragment extends Fragment {
     private String authToken;
     Pattern pattern;
     Pattern emptyPattern;
+    ProgressBar progressBar;
     private FragmentActivity activity;
+    private Button registerButton;
 
     public static RegisterFragment newInstance() {
         return new RegisterFragment();
@@ -52,10 +58,11 @@ public class RegisterFragment extends Fragment {
         EditText password_Edit = ((EditText) root_view.findViewById(R.id.register_password_edittext));
         EditText secondPassword_Edit = (EditText) root_view.findViewById(R.id.register_confirm_password_edittext);
         Button checkButton = (Button) root_view.findViewById(R.id.check_username_button);
-        Button registerButton = (Button) root_view.findViewById(R.id.register_button);
+        registerButton = (Button) root_view.findViewById(R.id.register_button);
         pattern = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE);
         emptyPattern = Pattern.compile("\\s+");
         registerButton.setEnabled(false);
+        progressBar = root_view.findViewById(R.id.progressBar1);
         secondPassword_Edit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -115,20 +122,28 @@ public class RegisterFragment extends Fragment {
         });
         registerButton.setOnClickListener(view -> {
             registerButton.setEnabled(false);
-            root_view.findViewById(R.id.progressBar1).setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             new Thread(() -> {
-                authToken = API.Authentication.register(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),activity);
-                activity.runOnUiThread(() -> {
-                    root_view.findViewById(R.id.progressBar1).setVisibility(View.GONE);
-                    registerButton.setEnabled(true);
-                    if (authToken == null){
-                        return;
-                    }
-                    Intent intent = new Intent();
-                    intent.putExtra("authToken",authToken);
-                    activity.setResult(Activity.RESULT_OK,intent);
-                    activity.finish();
+                boolean status = API.Authentication.register(username_edit.getText().toString(),email_edit.getText().toString(),password_Edit.getText().toString(),activity);
+                // TODO MAKE IT SO IT MOVES TO THE VERIFY ACTIVITY
+                activity.runOnUiThread(()->{
+                    Intent intent = new Intent(activity, VerifyEmailActivity.class);
+                    intent.putExtra("email",email_edit.getText().toString());
+                    intent.putExtra("password",username_edit.getText().toString());
+                    intent.putExtra("username",password_Edit.getText().toString());
+                    startActivityForResult(intent,3);
                 });
+//                activity.runOnUiThread(() -> {
+//                    root_view.findViewById(R.id.progressBar1).setVisibility(View.GONE);
+//                    registerButton.setEnabled(true);
+//                    if (authToken == null){
+//                        return;
+//                    }
+//                    Intent intent = new Intent();
+//                    intent.putExtra("authToken",authToken);
+//                    activity.setResult(Activity.RESULT_OK,intent);
+//                    activity.finish();
+//                });
             }).start();
         });
         email_edit.addTextChangedListener(new TextWatcher() {
@@ -199,4 +214,19 @@ public class RegisterFragment extends Fragment {
         this.activity = (FragmentActivity) context;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        if (requestCode == 3){
+            progressBar.setVisibility(View.GONE);
+            registerButton.setEnabled(true);
+        }
+        if (requestCode == 3 && data!=null){
+            authToken = data.getStringExtra("authToken");
+            Intent intent = new Intent();
+            intent.putExtra("authToken",authToken);
+            activity.setResult(Activity.RESULT_OK,intent);
+            activity.finish();
+        }
+    }
 }

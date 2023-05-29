@@ -44,9 +44,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.show();
         actionBar = getSupportActionBar();
-        new Thread(new Runnable() {
-        @Override
-        public void run() {
+        new Thread(() -> {
             if (!API.Authentication.checkAuth(authToken,MainActivity.this)[1]){
                 Intent intent = new Intent(MainActivity.this,AuthenticationActivity.class);
                 dialog.dismiss();
@@ -55,25 +53,21 @@ public class MainActivity extends AppCompatActivity {
             }
             currentUser = API.Authentication.getUser(authToken,MainActivity.this);
             dialog.dismiss();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    binding = ActivityMainBinding.inflate(getLayoutInflater());
-                    setContentView(binding.getRoot());
-                    navbar = findViewById(R.id.bottom_navigation);
-                    AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                            R.id.boards, R.id.scan, R.id.stories,R.id.profile)
-                            .build();
-                    NavController navController = Navigation.findNavController(MainActivity.this, R.id.nav_host_fragment_activity_main);
-                    NavigationUI.setupActionBarWithNavController(MainActivity.this, navController, appBarConfiguration);
-                    NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                    }
+            runOnUiThread(() -> {
+                binding = ActivityMainBinding.inflate(getLayoutInflater());
+                setContentView(binding.getRoot());
+                navbar = findViewById(R.id.bottom_navigation);
+                AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                        R.id.boards, R.id.scan, R.id.stories,R.id.profile)
+                        .build();
+                NavController navController = Navigation.findNavController(MainActivity.this, R.id.nav_host_fragment_activity_main);
+                NavigationUI.setupActionBarWithNavController(MainActivity.this, navController, appBarConfiguration);
+                NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 }
             });
-            }
-        }).start();
+            }).start();
     }
 
     @Override

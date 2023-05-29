@@ -31,7 +31,6 @@ public class AuthenticatedUser {
     public AuthenticatedUser(HashMap<String,Object> data){
         username = (String) data.get("username");
         email = (String) data.get("email");
-        notes = (List<Note>) data.get("notes");
         displayName = (String) data.get("displayName");
     }
 }

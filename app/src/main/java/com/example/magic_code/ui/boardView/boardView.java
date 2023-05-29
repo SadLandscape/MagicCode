@@ -172,84 +172,89 @@ public class boardView extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        board = (Board) getArguments().getSerializable("board");
+        board_id = board.getId();
         dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_loading);
         dialog.setCancelable(false);
+        View root_view = inflater.inflate(R.layout.fragment_board_view, container, false);
         ((TextView)dialog.findViewById(R.id.status_text)).setText("Loading board...");
-        dialog.show();
         sharedPreferences = activity.getSharedPreferences("MagicPrefs", activity.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        board = ((Board)getArguments().getSerializable("board"));
-        board_id = board.getId();
-        View root_view = inflater.inflate(R.layout.fragment_board_view, container, false);
-        ((MainActivity) activity).setActionBarTitle(board.getTitle());
+        dialog.show();
         RecyclerView recyclerView = root_view.findViewById(R.id.category_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
-        new Thread(() -> {
-            List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
-            activity.runOnUiThread(() -> {
-                adapter = new CategoryAdapter(categories,board,activity,authToken);
-                recyclerView.setLayoutManager(new LinearLayoutManager(activity));
-                recyclerView.setAdapter(adapter);
-                dialog.dismiss();
+        new Thread(()->{
+            board = API.Boards.getBoard(board_id,authToken,activity);
+            activity.runOnUiThread(()->{
+                ((MainActivity) activity).setActionBarTitle(board.getTitle());
+                new Thread(() -> {
+                    List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
+                    activity.runOnUiThread(() -> {
+                        adapter = new CategoryAdapter(categories,board,activity,authToken);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+                        recyclerView.setAdapter(adapter);
+                        dialog.dismiss();
+                    });
+                }).start();
+                refreshLayout = root_view.findViewById(R.id.category_refresh);
+                refreshLayout.setOnRefreshListener(() -> new Thread(() -> {
+                    List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
+                    activity.runOnUiThread(() -> {
+                        adapter.updateData(categories);
+                        refreshLayout.setRefreshing(false);
+                    });
+                }).start());
+                if (!board.canEdit()) {
+                    root_view.findViewById(R.id.create_category_button).setVisibility(View.GONE);
+                }
+                root_view.findViewById(R.id.create_category_button).setOnClickListener(view -> {
+                    Dialog dialog = new Dialog(activity);
+                    dialog.setContentView(R.layout.new_category_dialog);
+                    Button confirm_button = dialog.findViewById(R.id.new_category_dialog_create_button);
+                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                    lp.copyFrom(dialog.getWindow().getAttributes());
+                    lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.8);
+                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    dialog.getWindow().setAttributes(lp);
+                    EditText title_edit =  ((EditText) dialog.findViewById(R.id.new_category_dialog_category_title));
+                    confirm_button.setEnabled(false);
+                    title_edit.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                            if (title_edit.getText().toString().length() >= 3 && !TextUtils.isEmpty(title_edit.getText().toString().trim())){
+                                confirm_button.setEnabled(true);
+                                title_edit.setError(null);
+                            }
+                            else {
+                                confirm_button.setEnabled(false);
+                                title_edit.setError("Title must be at least 3 letters long!");
+                            }
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable editable) {
+
+                        }
+                    });
+                    confirm_button.setOnClickListener(view12 -> new Thread(() -> {
+                        API.Categories.createCategory(board_id,((EditText)dialog.findViewById(R.id.new_category_dialog_category_title)).getText().toString(),authToken,activity);
+                        List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
+                        activity.runOnUiThread(() -> {
+                            adapter.updateData(categories);
+                            dialog.dismiss();
+                        });
+                    }).start());
+                    dialog.findViewById(R.id.new_category_dialog_cancel_button).setOnClickListener(view1 -> dialog.dismiss());
+                    dialog.show();
+                });
             });
         }).start();
-        refreshLayout = root_view.findViewById(R.id.category_refresh);
-        refreshLayout.setOnRefreshListener(() -> new Thread(() -> {
-            List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
-            activity.runOnUiThread(() -> {
-                adapter.updateData(categories);
-                refreshLayout.setRefreshing(false);
-            });
-        }).start());
-        if (!board.canEdit()) {
-            root_view.findViewById(R.id.create_category_button).setVisibility(View.GONE);
-        }
-        root_view.findViewById(R.id.create_category_button).setOnClickListener(view -> {
-            Dialog dialog = new Dialog(activity);
-            dialog.setContentView(R.layout.new_category_dialog);
-            Button confirm_button = dialog.findViewById(R.id.new_category_dialog_create_button);
-            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-            lp.copyFrom(dialog.getWindow().getAttributes());
-            lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.8);
-            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            dialog.getWindow().setAttributes(lp);
-            EditText title_edit =  ((EditText) dialog.findViewById(R.id.new_category_dialog_category_title));
-            confirm_button.setEnabled(false);
-           title_edit.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    if (title_edit.getText().toString().length() >= 3 && !TextUtils.isEmpty(title_edit.getText().toString().trim())){
-                        confirm_button.setEnabled(true);
-                        title_edit.setError(null);
-                    }
-                    else {
-                        confirm_button.setEnabled(false);
-                        title_edit.setError("Title must be at least 3 letters long!");
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-
-                }
-            });
-            confirm_button.setOnClickListener(view12 -> new Thread(() -> {
-                API.Categories.createCategory(board_id,((EditText)dialog.findViewById(R.id.new_category_dialog_category_title)).getText().toString(),authToken,activity);
-                List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
-                activity.runOnUiThread(() -> {
-                    adapter.updateData(categories);
-                    dialog.dismiss();
-                });
-            }).start());
-            dialog.findViewById(R.id.new_category_dialog_cancel_button).setOnClickListener(view1 -> dialog.dismiss());
-            dialog.show();
-        });
         return root_view;
     }
 

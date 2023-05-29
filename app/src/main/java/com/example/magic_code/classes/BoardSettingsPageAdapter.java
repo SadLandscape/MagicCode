@@ -1,21 +1,12 @@
 package com.example.magic_code.classes;
 
-import android.content.Context;
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.magic_code.models.Member;
-import com.example.magic_code.models.ShareToken;
-import com.example.magic_code.ui.login.LoginFragment;
 import com.example.magic_code.ui.manageBoard.MembersPage.MembersPage;
 import com.example.magic_code.ui.manageBoard.TokensPage.TokensPage;
-import com.example.magic_code.ui.register.RegisterFragment;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BoardSettingsPageAdapter extends FragmentPagerAdapter {
 

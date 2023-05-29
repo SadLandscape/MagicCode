@@ -1,4 +1,4 @@
-package com.example.magic_code.ui.login;
+package com.example.magic_code.ui.manageBoard.login;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;

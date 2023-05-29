@@ -26,6 +26,7 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,10 +82,14 @@ public class API {
             }
             conn.disconnect();
         } catch (Exception e) {
+            Log.d("ERROR","makeRequest: "+e+e.getMessage());
             if (e instanceof SocketTimeoutException){
                 return new Object[] {false,"Request timed out, please check your internet and try again!"};
             }
             if (e instanceof ConnectException){
+                return new Object[] {false,"Unable to connect, please check your internet and try again!"};
+            }
+            if (e instanceof UnknownHostException){
                 return new Object[] {false,"Unable to connect, please check your internet and try again!"};
             }
             return new Object[] {false,e.toString()};
@@ -92,6 +97,32 @@ public class API {
         return new Object[] {false,"Internal server error! Please try again later"};
     }
     public static class Categories{
+        public static List<Category> moveCategory(String category_id,Integer direction, String authToken, Context ctx){
+            HashMap<String, Object> payload = new HashMap<String, Object>() {{
+                put("direction", direction);
+            }};
+            Object[] response = makeRequest("/api/categories/" + category_id + "/move", "PATCH", payload, authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return new ArrayList<>();
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ArrayList<Category> categoryList = new ArrayList<>();
+            List<LinkedTreeMap<String,Object>> categories = (List<LinkedTreeMap<String, Object>>) response_data.get("categories");
+            for (LinkedTreeMap<String,Object> category: categories) {
+                HashMap<String,Object> category_ = new HashMap<>(category);
+                categoryList.add(new Category(category_));
+            }
+            return categoryList;
+        }
         public static List<Note> getNotes(){
             List<Note> noteList = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -319,6 +350,25 @@ public class API {
             });
             return true;
         }
+
+        public static boolean updateTitle(String board_id,String title,String authToken,Context ctx){
+            HashMap<String, Object> body = new HashMap<String, Object>() {{
+                put("title", title);
+            }};
+            Object[] response = makeRequest("/api/boards/"+board_id+"/title", "POST", body,authToken);
+            boolean status = (boolean) response[0];
+            String resp = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, resp, Toast.LENGTH_SHORT).show());
+                return false;
+            }
+            String rbody = (String) response[1];
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show());
+            return true;
+        }
+
         public static boolean deleteToken(String tokenId,String authToken,Context ctx){
             Object[] response = makeRequest("/api/tokens/"+tokenId+"/delete","DELETE",null,authToken);
             boolean status = (boolean) response[0];
@@ -421,6 +471,47 @@ public class API {
             Log.d("ERROR", "checkUsername: "+rbody);
             return new boolean[]{true,(boolean)((HashMap<String,Object>)new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {}.getType())).get("available")};
         }
+
+        public static boolean requestNewCode(String email,String password, String username,Context ctx){
+            HashMap<String,Object> requestBody = new HashMap<String,Object>(){{
+                put("username",username);
+                put("email",email);
+                put("password",password);
+            }};
+            Object[] response = makeRequest("/api/auth/request","POST",requestBody,null);
+            boolean status = (boolean) response[0];
+            if (!status){
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String)response[1], Toast.LENGTH_SHORT).show());
+                return false;
+            }
+            String rbody = (String) response[1];
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show());
+            return true;
+        }
+
+        public static String checkEmailCode(String code,String email, Context ctx){
+            HashMap<String, Object> body = new HashMap<String, Object>() {{
+                put("email", email);
+                put("code", code);
+            }};
+            Object[] response = makeRequest("/api/auth/verify", "POST", body,null);
+            boolean status = (boolean) response[0];
+            String resp = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, resp, Toast.LENGTH_SHORT).show());
+                return null;
+            }
+            String rbody = (String) response[1];
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show());
+            return (String) response_data.get("authToken");
+        }
+
+
+
         public static String login(String email, String password, Context ctx) {
             HashMap<String, Object> body = new HashMap<String, Object>() {{
                 put("email", email);
@@ -430,26 +521,16 @@ public class API {
             boolean status = (boolean) response[0];
             String resp = (String) response[1];
             if (!status) {
-                ((Activity) ctx).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ctx, resp, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, resp, Toast.LENGTH_SHORT).show());
                 return null;
             }
             String rbody = (String) response[1];
             HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
             }.getType());
-            ((Activity) ctx).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show();
-                }
-            });
+            ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show());
             return (String) response_data.get("authToken");
         }
-        public static String register(String username,String email,String password,Context ctx){
+        public static boolean register(String username,String email,String password,Context ctx){
             HashMap<String,Object> requestBody = new HashMap<String,Object>(){{
                 put("username",username);
                 put("email",email);
@@ -458,30 +539,21 @@ public class API {
             Object[] response = makeRequest("/api/auth/register","POST",requestBody,null);
             boolean status = (boolean) response[0];
             if (!status){
-                ((Activity) ctx).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ctx, (String)response[1], Toast.LENGTH_SHORT).show();
-                    }
-                });
-                return null;
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String)response[1], Toast.LENGTH_SHORT).show());
+                return false;
             }
             String rbody = (String) response[1];
             HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
             }.getType());
-            ((Activity) ctx).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show();
-                }
-            });
-            return (String) response_data.get("authToken");
+            ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show());
+            return true;
         }
         public static boolean[] checkAuth(String authToken,Context ctx){
             Object[] response = makeRequest("/api/auth/checkAuth","GET",null,authToken);
             boolean status = (boolean) response[0];
             String resp = (String) response[1];
             if (!status){
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, resp, Toast.LENGTH_SHORT).show());
                 return new boolean[]{false,false};
             }
             HashMap<String, Object> response_data = new Gson().fromJson(resp, new TypeToken<HashMap<String, Object>>() {
@@ -489,38 +561,36 @@ public class API {
             return new boolean[] {true, (boolean) response_data.get("valid")};
 
         }
-//        public static List<Note> getNotes(String authToken,Context ctx){
-//            List<Note> exampleNotes = new ArrayList<>();
-//            Object[] response = makeRequest("/api/user/notes","GET",null,authToken);
-//            boolean status = (boolean) response[0];
-//            String rbody = (String) response[1];
-//            if (!status) {
-//                ((Activity) ctx).runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//                return new ArrayList<Note>();
-//            }
-//            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
-//            }.getType());
-//            List<Note> noteList = new ArrayList<>();
-//            List<LinkedTreeMap<String,Object>> notes = (List<LinkedTreeMap<String, Object>>) response_data.get("notes");
-//            for (LinkedTreeMap<String,Object> note_: notes) {
-//                HashMap<String,Object> note = new HashMap<>(note_);
-//                noteList.add(new Note(note));
-//            }
-//            return noteList;
-//        }
-
         public static AuthenticatedUser getUser(String authToken,Context ctx){
-            HashMap<String,Object> exampleUser = new HashMap<>();
-            exampleUser.put("Username","Example Username");
-            exampleUser.put("Email","example@gmail.com");
-            exampleUser.put("Boards",Boards.getBoards(authToken,ctx));
-            exampleUser.put("displayName","display name");
-            return new AuthenticatedUser(exampleUser);
+            Object[] response = makeRequest("/api/auth/users/current","GET",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show());
+                return null;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            return new AuthenticatedUser(response_data);
+        }
+        public static String changePassword(String old_password,String new_password,String authToken,Context ctx){
+            HashMap<String,Object> payload = new HashMap<String,Object>(){{
+                put("password",old_password);
+                put("newPassword",new_password);
+            }};
+            Object[] response = makeRequest("/api/auth/change_password","POST",payload,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show());
+                return null;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            ((Activity) ctx).runOnUiThread(() -> {
+                Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+            });
+            return (String)response_data.get("authToken");
         }
     }
 

@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.magic_code.ui.login.LoginFragment;
+import com.example.magic_code.ui.manageBoard.login.LoginFragment;
 import com.example.magic_code.ui.register.RegisterFragment;
 
 public class AuthenticationPagerAdapter extends FragmentPagerAdapter {

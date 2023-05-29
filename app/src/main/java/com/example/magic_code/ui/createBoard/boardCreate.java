@@ -24,6 +24,7 @@ import android.widget.EditText;
 
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class boardCreate extends Fragment {
 
@@ -84,7 +85,13 @@ public class boardCreate extends Fragment {
         }).start());
         return root_view;
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
+        MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
+        menuItem.setChecked(true);
+    }
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);

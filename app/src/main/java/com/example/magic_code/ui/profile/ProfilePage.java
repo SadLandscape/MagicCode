@@ -44,28 +44,29 @@ public class ProfilePage extends Fragment {
         View view = inflater.inflate(R.layout.profile, container, false);
         sharedPreferences = activity.getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
-        currentUser = API.Authentication.getUser(authToken,activity);
-        ((TextView) view.findViewById(R.id.text_username)).setText(currentUser.getUsername());
-        ((TextView) view.findViewById(R.id.text_email)).setText(currentUser.getEmail());
-        ((Button) view.findViewById(R.id.button_logout)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("authToken","");
-                editor.apply();
-                Intent intent = new Intent(activity, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }
-        });
-        ((Button) view.findViewById(R.id.button_settings)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ProfileSettings fragment = ProfileSettings.newInstance(authToken);
-                NavController navController = Navigation.findNavController(requireView());
-                navController.navigate(R.id.action_profile_to_profile_settings,fragment.getArguments());
-            }
-        });
+        new Thread(()->{
+            currentUser = API.Authentication.getUser(authToken,activity);
+            activity.runOnUiThread(()->{
+                if (currentUser == null){
+                    return;
+                }
+                ((TextView) view.findViewById(R.id.text_username)).setText(currentUser.getUsername());
+                ((TextView) view.findViewById(R.id.text_email)).setText(currentUser.getEmail());
+                view.findViewById(R.id.button_logout).setOnClickListener(view1 -> {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("authToken","");
+                    editor.apply();
+                    Intent intent = new Intent(activity, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                });
+                view.findViewById(R.id.button_settings).setOnClickListener(view12 -> {
+                    ProfileSettings fragment = ProfileSettings.newInstance(authToken);
+                    NavController navController = Navigation.findNavController(requireView());
+                    navController.navigate(R.id.action_profile_to_profile_settings,fragment.getArguments());
+                });
+            });
+        }).start();
         return view;
     }
 

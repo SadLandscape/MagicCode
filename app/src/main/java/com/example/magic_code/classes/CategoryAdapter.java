@@ -61,6 +61,12 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             holder.categoryTitleTextView.setOnLongClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(ctx, holder.itemView);
                 popupMenu.getMenuInflater().inflate(R.menu.delete_category_menu, popupMenu.getMenu());
+                if (position == 0){
+                    popupMenu.getMenu().findItem(R.id.category_move_up).setVisible(false);
+                }
+                if (position == categoryList.size()-1){
+                    popupMenu.getMenu().findItem(R.id.category_move_down).setVisible(false);
+                }
                 popupMenu.setOnMenuItemClickListener(item -> {
                     if (item.getItemId() == R.id.menu_delete) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
@@ -76,6 +82,18 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
                         builder.setNegativeButton("Cancel", null);
                         AlertDialog dialog = builder.create();
                         dialog.show();
+                        return true;
+                    }
+                    if (item.getItemId() == R.id.category_move_up || item.getItemId() == R.id.category_move_down){
+                        new Thread(()->{
+                            List<Category> result = API.Categories.moveCategory(category.getId(),(item.getItemId() == R.id.category_move_up ? 1 : -1),authToken,ctx);
+                            ((Activity)ctx).runOnUiThread(()->{
+                                if (result.size() == 0){
+                                    return;
+                                }
+                                updateData(result);
+                            });
+                        }).start();
                         return true;
                     }
                     return false;

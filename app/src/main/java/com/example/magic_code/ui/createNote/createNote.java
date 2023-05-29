@@ -29,6 +29,7 @@ import com.example.magic_code.R;
 import com.example.magic_code.api.API;
 import com.example.magic_code.models.AuthenticatedUser;
 import com.example.magic_code.models.Category;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,6 +148,13 @@ public class createNote extends Fragment {
         super.onActivityCreated(savedInstanceState);
         CreateNoteViewModel mViewModel = new ViewModelProvider(this).get(CreateNoteViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
+        MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
+        menuItem.setChecked(true);
     }
     @Override
     public void onAttach(@NonNull Context context) {

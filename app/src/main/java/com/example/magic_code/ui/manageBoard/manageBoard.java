@@ -17,12 +17,16 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.magic_code.MainActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
 import com.example.magic_code.classes.AuthenticationPagerAdapter;
@@ -32,6 +36,7 @@ import com.example.magic_code.classes.TokenAdapter;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Member;
 import com.example.magic_code.models.ShareToken;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -63,6 +68,11 @@ public class manageBoard extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.manage_board_menu,menu);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
@@ -76,6 +86,14 @@ public class manageBoard extends Fragment {
         viewPager.setAdapter(pagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
         TextInputEditText titleBoard = root_view.findViewById(R.id.title_board_edittext);
+        Button saveBtn = root_view.findViewById(R.id.save_button);
+        saveBtn.setOnClickListener(v->{
+            v.setEnabled(false);
+            new Thread(()->{
+                API.Boards.updateTitle(board_id,titleBoard.getText().toString(),authToken,activity);
+                activity.runOnUiThread(()-> v.setEnabled(true));
+            }).start();
+        });
         new Thread(()->{
             Board board = API.Boards.getBoard(board_id,authToken,activity);
             activity.runOnUiThread(()->{
@@ -91,6 +109,13 @@ public class manageBoard extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(ManageBoardViewModel.class);
         // TODO: Use the ViewModel
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
+        MenuItem menuItem = bottomNavigationView.getMenu().findItem(R.id.boards);
+        menuItem.setChecked(true);
     }
     @Override
     public void onAttach(@NonNull Context context) {
