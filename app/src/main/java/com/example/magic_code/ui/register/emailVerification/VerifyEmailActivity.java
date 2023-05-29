@@ -111,17 +111,18 @@ public class VerifyEmailActivity extends AppCompatActivity {
 
         }
         clipBoard.addPrimaryClipChangedListener(()->{
+            ClipData clipData = clipBoard.getPrimaryClip();
+            if (clipData == null){return;}
+            ClipData.Item item = clipData.getItemAt(0);
+            if (item == null){return;}
+            String clipboard = item.getText().toString();
+            if (!(clipboard.length() == 6 && NumberUtils.isDigits(clipboard))){return;}
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Attention");
             builder.setMessage("An OTP (6 digit) code was found in your clipboard, would you like to paste it?");
             builder.setPositiveButton("Yes", (dialog, which) -> {
-                ClipData clipData = clipBoard.getPrimaryClip();
-                ClipData.Item item = clipData.getItemAt(0);
-                String clipboard = item.getText().toString();
-                if (clipboard.length() == 6 && NumberUtils.isDigits(clipboard)){
-                    for (int i = 0; i < clipboard.length(); i++) {
-                        editTexts.get(i).setText(String.valueOf(clipboard.charAt(i)));
-                    }
+                for (int i = 0; i < clipboard.length(); i++) {
+                    editTexts.get(i).setText(String.valueOf(clipboard.charAt(i)));
                 }
             });
             builder.setNegativeButton("No", null);
@@ -227,17 +228,18 @@ public class VerifyEmailActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus && !isAlertDialogShowing) {
+            ClipData clipData = clipBoard.getPrimaryClip();
+            if (clipData == null){return;}
+            ClipData.Item item = clipData.getItemAt(0);
+            if (item == null){return;}
+            String clipboard = item.getText().toString();
+            if (!(clipboard.length() == 6 && NumberUtils.isDigits(clipboard))){return;}
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Attention");
             builder.setMessage("An OTP (6-digit) code was found in your clipboard. Would you like to paste it?");
             builder.setPositiveButton("Yes", (dialog, which) -> {
-                ClipData clipData = clipBoard.getPrimaryClip();
-                ClipData.Item item = clipData.getItemAt(0);
-                String clipboard = item.getText().toString();
-                if (clipboard.length() == 6 && NumberUtils.isDigits(clipboard)) {
-                    for (int i = 0; i < clipboard.length(); i++) {
-                        editTexts.get(i).setText(String.valueOf(clipboard.charAt(i)));
-                    }
+                for (int i = 0; i < clipboard.length(); i++) {
+                    editTexts.get(i).setText(String.valueOf(clipboard.charAt(i)));
                 }
             });
             builder.setNegativeButton("No", null);

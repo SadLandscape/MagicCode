@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -148,6 +149,7 @@ public class NoteFragment extends Fragment {
         note_id = getArguments().getString("note_id");
         View root_view = inflater.inflate(R.layout.noteview, container, false);
         noteDescription = (EditText) root_view.findViewById(R.id.note_text);
+        noteDescription.setMovementMethod(LinkMovementMethod.getInstance());
         progressBar = root_view.findViewById(R.id.progressBar2);
         new Thread(() -> {
             note = API.Notes.getNote(note_id,authToken,activity);

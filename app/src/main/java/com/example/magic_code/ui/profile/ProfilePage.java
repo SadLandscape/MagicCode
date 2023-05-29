@@ -50,8 +50,9 @@ public class ProfilePage extends Fragment {
                 if (currentUser == null){
                     return;
                 }
-                ((TextView) view.findViewById(R.id.text_username)).setText(currentUser.getUsername());
-                ((TextView) view.findViewById(R.id.text_email)).setText(currentUser.getEmail());
+                ((TextView) view.findViewById(R.id.text_username)).setText("Username: "+currentUser.getUsername());
+                ((TextView) view.findViewById(R.id.text_email)).setText("Email: "+currentUser.getEmail());
+                ((TextView) view.findViewById(R.id.text_display_name)).setText("Display Name: "+currentUser.getDisplayName());
                 view.findViewById(R.id.button_logout).setOnClickListener(view1 -> {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("authToken","");

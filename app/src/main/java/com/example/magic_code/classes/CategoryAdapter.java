@@ -2,15 +2,21 @@ package com.example.magic_code.classes;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -96,10 +102,56 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
                         }).start();
                         return true;
                     }
+                    if (item.getItemId() == R.id.menu_edit){
+                        Dialog dialog = new Dialog(ctx);
+                        dialog.setContentView(R.layout.dialog_change_category_title);
+                        EditText newTitleInput = dialog.findViewById(R.id.new_title_et);
+                        Button okButton = dialog.findViewById(R.id.change_title_cat_btn);
+                        okButton.setEnabled(false);
+                        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                        lp.copyFrom(dialog.getWindow().getAttributes());
+                        lp.width = (int) (ctx.getResources().getDisplayMetrics().widthPixels * 0.8);
+                        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                        dialog.getWindow().setAttributes(lp);
+                        newTitleInput.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                if (newTitleInput.getText().toString().length() >= 3 && !TextUtils.isEmpty(newTitleInput.getText().toString().trim())){
+                                    okButton.setEnabled(true);
+                                    newTitleInput.setError(null);
+                                }
+                                else {
+                                    okButton.setEnabled(false);
+                                    newTitleInput.setError("Title must be at least 3 letters long!");
+                                }
+                            }
+                            @Override
+                            public void afterTextChanged(Editable editable) {
+
+                            }
+                        });
+                        okButton.setOnClickListener(v1->{
+                            new Thread(()->{
+                                boolean status = API.Categories.changeTitle(category.getId(),newTitleInput.getText().toString(),authToken,ctx);
+                                ((Activity)ctx).runOnUiThread(()->{
+                                    if (!status) {
+                                        return;
+                                    }
+                                    holder.categoryTitleTextView.setText(newTitleInput.getText().toString());
+                                    dialog.dismiss();
+                                });
+                            }).start();
+                        });
+                        dialog.show();
+                    }
                     return false;
                 });
                 popupMenu.show();
-
                 return true;
             });
         }

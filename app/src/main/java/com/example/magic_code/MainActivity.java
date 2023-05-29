@@ -10,11 +10,14 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.ui.AppBarConfiguration;
+
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.example.magic_code.api.API;
@@ -23,6 +26,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.example.magic_code.databinding.ActivityMainBinding;
 import android.Manifest;
 import android.widget.Toast;
+
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -39,6 +44,21 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         authToken = sharedPreferences.getString("authToken","");
+        Uri uri = getIntent().getData();
+        if (uri != null) {
+            List<String> parameters = uri.getPathSegments();
+            String location = parameters.get(parameters.size() - 2);
+            String inviteId = parameters.get(parameters.size()-1);
+            if (location.equals("invites")){
+                new Thread(()->{
+                    boolean status = API.Invites.validateInvite(inviteId,this);
+                    if (status){
+                        editor.putString("pendingInvite",inviteId);
+                        editor.commit();
+                    }
+                }).start();
+            }
+        }
         Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog_loading);
         dialog.setCancelable(false);
@@ -53,7 +73,22 @@ public class MainActivity extends AppCompatActivity {
             }
             currentUser = API.Authentication.getUser(authToken,MainActivity.this);
             dialog.dismiss();
+            String pendingInvite = sharedPreferences.getString("pendingInvite","");
             runOnUiThread(() -> {
+                if (!pendingInvite.equals("")){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Attention");
+                    builder.setMessage("You were invited to "+pendingInvite+" by ..., would you like to join?");
+                    builder.setPositiveButton("Yes", (dialog_, which) -> {
+                    });
+                    builder.setNegativeButton("No", (dialog_,which)->{
+                        editor.putString("pendingInvite","");
+                        editor.commit();
+                    });
+                    AlertDialog dialog1 = builder.create();
+                    dialog1.setCancelable(false);
+                    dialog1.show();
+                }
                 binding = ActivityMainBinding.inflate(getLayoutInflater());
                 setContentView(binding.getRoot());
                 navbar = findViewById(R.id.bottom_navigation);

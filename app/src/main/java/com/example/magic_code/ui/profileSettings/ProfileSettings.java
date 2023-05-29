@@ -63,7 +63,7 @@ public class ProfileSettings extends Fragment {
             currentUser = API.Authentication.getUser(authToken,activity);
             activity.runOnUiThread(()->{
                 EditText username_edit = view.findViewById(R.id.editTextUsername);
-                username_edit.setText(currentUser.getUsername());
+                username_edit.setText(currentUser.getDisplayName());
                 username_edit.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -82,13 +82,18 @@ public class ProfileSettings extends Fragment {
                             finishBtn.setEnabled(false);
                             return;
                         }
+                        if (username_edit.getText().toString().equals(currentUser.getDisplayName())){
+                            username_edit.setError("Username cannot stay the same!");
+                            finishBtn.setEnabled(false);
+                            return;
+                        }
                         if (!finishBtn.isEnabled()) {
                             finishBtn.setEnabled(true);
                         }
                         username_edit.setError(null);
                     }
                 });
-                ((Button) view.findViewById(R.id.buttonChangePassword)).setOnClickListener(view1 -> {
+                view.findViewById(R.id.buttonChangePassword).setOnClickListener(view1 -> {
                     Dialog dialog = new Dialog(activity);
                     dialog.setContentView(R.layout.dialog_change_password);
                     EditText currentPasswordEditText = dialog.findViewById(R.id.current_password_edittext);
@@ -156,7 +161,17 @@ public class ProfileSettings extends Fragment {
 
                     dialog.show();
                 });
-                finishBtn.setOnClickListener(view12 -> Navigation.findNavController(requireView()).navigateUp());
+                finishBtn.setOnClickListener(view12 -> {
+                    new Thread(() -> {
+                        boolean status = API.Authentication.changeDisplayName(username_edit.getText().toString(), authToken, activity);
+                        activity.runOnUiThread(() -> {
+                            if (!status) {
+                                return;
+                            }
+                            Navigation.findNavController(requireView()).navigateUp();
+                        });
+                    }).start();
+                });
             });
         }).start();
         return view;
