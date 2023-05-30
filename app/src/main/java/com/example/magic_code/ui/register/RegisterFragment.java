@@ -38,7 +38,7 @@ public class RegisterFragment extends Fragment {
     Pattern pattern;
     Pattern emptyPattern;
     ProgressBar progressBar;
-    private FragmentActivity activity;
+    private AuthenticationActivity activity;
     private Button registerButton;
 
     public static RegisterFragment newInstance() {
@@ -211,7 +211,7 @@ public class RegisterFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        this.activity = (FragmentActivity) context;
+        this.activity = (AuthenticationActivity) context;
     }
 
     @Override
@@ -225,7 +225,7 @@ public class RegisterFragment extends Fragment {
             authToken = data.getStringExtra("authToken");
             Intent intent = new Intent();
             intent.putExtra("authToken",authToken);
-            activity.setResult(Activity.RESULT_OK,intent);
+            activity.setData(intent);
             activity.finish();
         }
     }

@@ -52,19 +52,19 @@ public class MembersPage extends Fragment {
         View root_view = inflater.inflate(R.layout.fragment_members_page, container, false);
         RecyclerView membersRv = root_view.findViewById(R.id.users_recyclerview);
         SwipeRefreshLayout refreshLayout = root_view.findViewById(R.id.members_refresh);
-        refreshLayout.setOnRefreshListener(() -> new Thread(() -> {
-            List<Member> members = API.Boards.getMembers(board_id,authToken,activity);
-            activity.runOnUiThread(() -> {
-                memberAdapter.updateData(members);
-                refreshLayout.setRefreshing(false);
-            });
-        }).start());
         new Thread(()->{
             members = new ArrayList<>(API.Boards.getMembers(board_id,authToken,activity));
             activity.runOnUiThread(()->{
                 memberAdapter = new MemberAdapter(members,activity,authToken);
-                membersRv.setAdapter(memberAdapter);
                 membersRv.setLayoutManager(new LinearLayoutManager(activity));
+                membersRv.setAdapter(memberAdapter);
+                refreshLayout.setOnRefreshListener(() -> new Thread(() -> {
+                    members = new ArrayList<>(API.Boards.getMembers(board_id,authToken,activity));
+                    activity.runOnUiThread(() -> {
+                        memberAdapter.updateData(members);
+                        refreshLayout.setRefreshing(false);
+                    });
+                }).start());
             });
         }).start();
         return root_view;

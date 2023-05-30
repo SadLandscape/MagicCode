@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.example.magic_code.models.AuthenticatedUser;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
+import com.example.magic_code.models.Invite;
 import com.example.magic_code.models.Member;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.models.ShareToken;
@@ -250,6 +251,7 @@ public class API {
                 });
                 return new ArrayList<>();
             }
+
             HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
             }.getType());
             List<Board> boardList = new ArrayList<>();
@@ -259,6 +261,22 @@ public class API {
                 boardList.add(new Board(board_));
             }
             return boardList;
+        }
+        public static boolean removeMember(Member member,String authToken,Context ctx){
+            Object[] response = makeRequest("/api/boards/"+member.getBoardId()+"/members/"+member.getId()+"/delete","DELETE",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(()-> {
+                    Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
+                });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {}.getType());
+            ((Activity)ctx).runOnUiThread(()->{
+                Toast.makeText(ctx, (String)response_data.get("message"), Toast.LENGTH_SHORT).show();
+            });
+            return true;
         }
         public static Board getBoard(String board_id,String authToken, Context ctx){
             Object[] response = makeRequest("/api/boards/"+board_id,"GET",null,authToken);
@@ -785,8 +803,23 @@ public class API {
             });
             return true;
         }
-        public static boolean validateInvite(String inviteId,Context ctx){
+        public static Invite validateInvite(String inviteId, Context ctx){
             Object[] response = makeRequest("/api/invites/"+inviteId+"/validate", "GET", null,null);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show());
+                return null;
+            }
+            HashMap<String, String> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, String>>() {
+            }.getType());
+            return new Invite(response_data);
+        }
+        public static boolean acceptInvite(String inviteId,String authToken,Context ctx){
+            HashMap<String, Object> payload = new HashMap<String,Object>(){{
+                put("invite_id",inviteId);
+            }};
+            Object[] response = makeRequest("/api/invites/use", "POST", payload,authToken);
             boolean status = (boolean) response[0];
             String rbody = (String) response[1];
             if (!status) {
@@ -795,6 +828,12 @@ public class API {
             }
             HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
             }.getType());
+            ((Activity) ctx).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(ctx, (String) response_data.get("message"), Toast.LENGTH_SHORT).show();
+                }
+            });
             return true;
         }
     }

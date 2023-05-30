@@ -51,13 +51,6 @@ public class TokensPage extends Fragment {
         authToken = getArguments().getString("authToken");
         View root_view = inflater.inflate(R.layout.fragment_tokens_page, container, false);
         SwipeRefreshLayout refreshLayout = root_view.findViewById(R.id.tokens_refresh);
-        refreshLayout.setOnRefreshListener(() -> new Thread(() -> {
-            List<ShareToken> tokens = API.Boards.getTokens(board_id,authToken,activity);
-            activity.runOnUiThread(() -> {
-                tokenAdapter.updateData(tokens);
-                refreshLayout.setRefreshing(false);
-            });
-        }).start());
         new Thread(()->{
             tokens = new ArrayList<>(API.Boards.getTokens(board_id,authToken,activity));
             activity.runOnUiThread(()->{
@@ -65,6 +58,13 @@ public class TokensPage extends Fragment {
                 tokenAdapter = new TokenAdapter(tokens,activity,authToken);
                 tokensRv.setAdapter(tokenAdapter);
                 tokensRv.setLayoutManager(new LinearLayoutManager(activity));
+                refreshLayout.setOnRefreshListener(() -> new Thread(() -> {
+                    List<ShareToken> tokens = API.Boards.getTokens(board_id,authToken,activity);
+                    activity.runOnUiThread(() -> {
+                        tokenAdapter.updateData(tokens);
+                        refreshLayout.setRefreshing(false);
+                    });
+                }).start());
             });
         }).start();
         return root_view;

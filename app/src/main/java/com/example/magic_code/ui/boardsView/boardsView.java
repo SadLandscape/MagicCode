@@ -125,5 +125,21 @@ public class boardsView extends Fragment {
         this.activity = (FragmentActivity) context;
     }
 
+    public void refreshBoards(){
+        if (isVisible() && activity!=null) {
+            dialog = new Dialog(activity);
+            dialog.setContentView(R.layout.dialog_loading);
+            dialog.setCancelable(false);
+            ((TextView)dialog.findViewById(R.id.status_text)).setText("Refreshing boards...");
+            dialog.show();
+            new Thread(()->{
+                List<Board> boardList = API.Boards.getBoards(authToken, activity);
+                activity.runOnUiThread(()-> {
+                    dialog.dismiss();
+                    adapter.updateData(boardList);
+                });
+            }).start();
+        }
+    }
 
 }

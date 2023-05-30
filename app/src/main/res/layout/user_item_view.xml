@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="95dp"
     app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="8.0dip"
     app:cardElevation="4.0dip"
@@ -18,34 +18,46 @@
             android:layout_width="0.0dip"
             android:layout_height="fill_parent"
             android:layout_weight="1.0">
+
             <TextView
+                android:id="@+id/user_name_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Username"
                 android:textSize="16.0sp"
                 android:textStyle="bold"
-                android:id="@+id/user_name_textview"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Username" />
+                app:autoSizeMaxTextSize="24sp"
+                app:autoSizeMinTextSize="14sp"
+                app:autoSizeStepGranularity="2sp"
+                app:autoSizeTextType="uniform" />
+
             <androidx.appcompat.widget.AppCompatTextView
-                android:textSize="12.0sp"
-                android:textColor="@android:color/darker_gray"
-                android:ellipsize="end"
                 android:id="@+id/user_email_textview"
-                android:layout_width="fill_parent"
-                android:layout_height="0.0dip"
-                android:text="email"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.0"
+                android:ellipsize="end"
                 android:maxLines="1"
-                android:layout_weight="1.0" />
+                android:text="email"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp"
+                app:autoSizeMaxTextSize="14sp"
+                app:autoSizeMinTextSize="8sp"
+                app:autoSizeStepGranularity="2sp"
+                app:autoSizeTextType="uniform" />
         </LinearLayout>
+
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_read_only"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:text="Read-Only" />
         <ImageButton
             android:id="@+id/remove_user_button"
-            android:layout_width="40.0dip"
-            android:layout_height="40.0dip"
+            android:layout_width="45.5dp"
+            android:layout_height="45.5dp"
             android:src="@drawable/baseline_remove_24"
+            android:layout_marginTop="8dp"
             android:backgroundTint="#ffef5350" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

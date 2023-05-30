@@ -1,10 +1,8 @@
-package com.example.magic_code.ui.manageBoard.login;
+package com.example.magic_code.ui.login;
 
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.magic_code.AuthenticationActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
 
@@ -32,7 +31,7 @@ public class LoginFragment extends Fragment {
     private LoginViewModel mViewModel;
     private String authToken;
     private InputMethodManager imm;
-    private FragmentActivity activity;
+    private AuthenticationActivity activity;
 
     public static LoginFragment newInstance() {
         return new LoginFragment();
@@ -91,7 +90,7 @@ public class LoginFragment extends Fragment {
                     }
                     Intent intent = new Intent();
                     intent.putExtra("authToken",authToken);
-                    activity.setResult(Activity.RESULT_OK,intent);
+                    activity.setData(intent);
                     activity.finish();
                 });
             }).start();
@@ -108,7 +107,7 @@ public class LoginFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        this.activity = (FragmentActivity) context;
+        this.activity = (AuthenticationActivity) context;
     }
 
 }

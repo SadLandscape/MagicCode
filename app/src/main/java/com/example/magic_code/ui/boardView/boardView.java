@@ -205,8 +205,8 @@ public class boardView extends Fragment {
                         refreshLayout.setRefreshing(false);
                     });
                 }).start());
-                if (!board.canEdit()) {
-                    root_view.findViewById(R.id.create_category_button).setVisibility(View.GONE);
+                if (board.canEdit()) {
+                    root_view.findViewById(R.id.create_category_button).setVisibility(View.VISIBLE);
                 }
                 root_view.findViewById(R.id.create_category_button).setOnClickListener(view -> {
                     Dialog dialog = new Dialog(activity);

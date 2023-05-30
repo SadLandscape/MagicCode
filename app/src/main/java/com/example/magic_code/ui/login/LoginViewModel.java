@@ -1,4 +1,4 @@
-package com.example.magic_code.ui.manageBoard.login;
+package com.example.magic_code.ui.login;
 
 import androidx.lifecycle.ViewModel;
 

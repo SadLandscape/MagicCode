@@ -11,7 +11,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/user_container"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="256dp"
         app:cardCornerRadius="8.0dip"
         app:cardElevation="4.0dip"
@@ -32,8 +32,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:gravity="center"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                app:autoSizeMaxTextSize="24sp"
+                app:autoSizeMinTextSize="14sp"
+                app:autoSizeStepGranularity="2sp"
+                app:autoSizeTextType="uniform"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -43,8 +48,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:gravity="center"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                app:autoSizeMaxTextSize="24sp"
+                app:autoSizeMinTextSize="14sp"
+                app:autoSizeStepGranularity="2sp"
+                app:autoSizeTextType="uniform"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.497"
                 app:layout_constraintStart_toStartOf="parent"
@@ -52,14 +62,19 @@
 
             <TextView
                 android:id="@+id/text_email"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="25sp"
                 android:layout_marginTop="16dp"
+                android:gravity="center"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                app:autoSizeMaxTextSize="24sp"
+                app:autoSizeMinTextSize="8sp"
+                app:autoSizeStepGranularity="2sp"
+                app:autoSizeTextType="uniform"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/button_settings"
