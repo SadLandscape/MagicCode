@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tokenHolder" android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="@android:color/white"
+    app:cardBackgroundColor="?colorPrimaryContainer"
     app:cardCornerRadius="8.0dip"
     app:cardElevation="2.0dip"
     app:cardUseCompatPadding="true">
@@ -24,16 +24,18 @@
                 android:textStyle="bold" android:id="@+id/qr_id_view"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:background="?android:textColorPrimary"
                 android:text="ID" />
             <TextView
                 android:textSize="10.0sp"
-                android:textColor="@android:color/black"
+                android:textColor="?android:textColorPrimary"
                 android:id="@+id/qr_uses_view"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="Uses: " />
             <androidx.appcompat.widget.SwitchCompat
                 android:enabled="false"
+                android:textColor="?android:textColorPrimary"
                 android:textSize="8.0sp"
                 android:id="@+id/qrPermSwitch"
                 android:layout_width="wrap_content"

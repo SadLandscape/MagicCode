@@ -2,40 +2,50 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?primaryBackgroundColor"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/board_title_input"
-        android:layout_width="0.0dip"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="8.0dip"
-         android:hint="Board Title"
-        android:layout_marginEnd="3.0dip"
-        app:layout_constraintEnd_toStartOf="@id/save_button"
+        android:hint="Board Title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_default="percent"
         app:layout_constraintWidth_percent="0.8">
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/title_board_edittext"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:imeOptions="actionNext" />
+            android:imeOptions="actionNext"
+            android:background="?colorSecondaryContainer"
+            android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
+
     <Button
         android:id="@+id/save_button"
         android:layout_width="0.0dip"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="8.0dip"
+        android:layout_marginEnd="4dp"
         android:text="Save"
-        android:layout_marginStart="2.0dip"
-        app:layout_constraintStart_toEndOf="@id/board_title_input"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/board_title_input"
         app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/board_tab_layout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="?colorSecondaryContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/board_title_input"
@@ -45,6 +55,7 @@
         android:id="@+id/board_view_pager"
         android:layout_width="fill_parent"
         android:layout_height="0.0dip"
+        android:background="?colorPrimaryContainer"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

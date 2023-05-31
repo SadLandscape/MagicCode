@@ -2,6 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:background="?primaryBackgroundColor"
     android:layout_height="match_parent">
 
     <EditText
@@ -13,7 +14,8 @@
         android:layout_marginEnd="16dp"
         android:inputType="text"
         android:text="Note Title"
-        android:textColor="@android:color/black"
+        android:textColor="?android:textColorPrimary"
+        android:background="?colorSecondaryContainer"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,7 +29,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="64dp"
-        android:background="@color/material_dynamic_neutral80"
+        android:background="?primaryNoteViewColor"
         android:gravity="top|start"
         android:hint="Enter your note here"
         android:inputType="textMultiLine"
@@ -55,6 +57,8 @@
         <AutoCompleteTextView
             android:id="@+id/choose_category_dropdown"
             android:layout_width="match_parent"
+            android:textColor="?android:textColorPrimary"
+            android:background="?colorSecondaryContainer"
             android:layout_height="wrap_content"
             android:inputType="none" />
     </com.google.android.material.textfield.TextInputLayout>

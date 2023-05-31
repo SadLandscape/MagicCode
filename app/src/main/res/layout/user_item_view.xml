@@ -12,7 +12,8 @@
         android:orientation="horizontal"
         android:padding="8.0dip"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:background="?colorPrimaryContainer">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0.0dip"
@@ -23,6 +24,7 @@
                 android:id="@+id/user_name_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="?android:textColorPrimary"
                 android:text="Username"
                 android:textSize="16.0sp"
                 android:textStyle="bold"
@@ -39,7 +41,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="email"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="?android:textColorPrimary"
                 android:textSize="14sp"
                 app:autoSizeMaxTextSize="14sp"
                 app:autoSizeMinTextSize="8sp"
@@ -51,6 +53,7 @@
             android:id="@+id/switch_read_only"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:textColor="?android:textColorPrimary"
             android:text="Read-Only" />
         <ImageButton
             android:id="@+id/remove_user_button"

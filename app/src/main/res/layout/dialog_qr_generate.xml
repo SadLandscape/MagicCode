@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:text="QR Code"
         android:textAlignment="center"
-        android:textColor="@color/black"
+        android:textColor="?android:textColorPrimary"
         android:textSize="20sp"
         android:textStyle="bold" />
 

@@ -19,6 +19,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -89,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
         authToken = sharedPreferences.getString("authToken", "");
         Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog_loading);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
         dialog.setCancelable(false);
         dialog.show();
         String pendingInvite = sharedPreferences.getString("pendingInvite", "");
@@ -140,6 +144,12 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = intent.getData();
         if (uri != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             List<String> parameters = uri.getPathSegments();
+            if (parameters == null){
+                return;
+            }
+            if (parameters.size() < 2){
+                return;
+            }
             String location = parameters.get(parameters.size() - 2);
             String inviteId = parameters.get(parameters.size()-1);
             if (inviteId.equals("")){

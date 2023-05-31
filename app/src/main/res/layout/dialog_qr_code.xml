@@ -7,6 +7,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
+        android:background="?colorPrimaryContainer"
         android:padding="16dp">
 
         <TextView
@@ -15,7 +16,7 @@
             android:layout_height="wrap_content"
             android:text="QR Code"
             android:textAlignment="center"
-            android:textColor="@color/black"
+            android:textColor="?android:textColorPrimary"
             android:textSize="20sp"
             android:textStyle="bold" />
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="primaryBackgroundColor" format="color" />
+    <attr name="primaryRvColor" format="color" />
+    <attr name="primaryNoteViewColor" format="color"/>
+</resources>

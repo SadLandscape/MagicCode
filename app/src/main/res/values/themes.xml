@@ -11,7 +11,11 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="colorPrimaryContainer">@color/white</item>
+        <item name="colorSecondaryContainer">@color/white</item>
+        <item name="primaryBackgroundColor">@color/white</item>
         <!-- Customize your theme here. -->
+        <item name="primaryNoteViewColor">@color/material_dynamic_neutral80</item>
         <item name="overlapAnchor">false</item>
         <item name="android:actionOverflowButtonStyle">@style/MyOverflowButtonStyle</item>
     </style>

@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModelProvider;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -96,6 +98,8 @@ public class ProfileSettings extends Fragment {
                 view.findViewById(R.id.buttonChangePassword).setOnClickListener(view1 -> {
                     Dialog dialog = new Dialog(activity);
                     dialog.setContentView(R.layout.dialog_change_password);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
                     EditText currentPasswordEditText = dialog.findViewById(R.id.current_password_edittext);
                     EditText newPasswordEditText = dialog.findViewById(R.id.new_password_edittext);
                     Button okButton = dialog.findViewById(R.id.ok_button);

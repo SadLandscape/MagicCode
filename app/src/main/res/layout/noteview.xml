@@ -12,7 +12,7 @@
         android:layout_height="fill_parent"
         android:layout_marginStart="5.0dip"
         android:layout_marginEnd="5.0dip"
-        android:background="@android:color/transparent"
+        android:background="?colorSecondaryContainer"
         android:editable="false"
         android:gravity="center|left|top"
         android:inputType="textMultiLine"
