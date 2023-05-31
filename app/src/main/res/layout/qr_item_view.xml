@@ -24,7 +24,7 @@
                 android:textStyle="bold" android:id="@+id/qr_id_view"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:background="?android:textColorPrimary"
+                android:textColor="?android:textColorPrimary"
                 android:text="ID" />
             <TextView
                 android:textSize="10.0sp"

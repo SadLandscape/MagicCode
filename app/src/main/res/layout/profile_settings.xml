@@ -24,7 +24,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:background="?colorSecondaryContainer"
         android:hint="Enter username"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"

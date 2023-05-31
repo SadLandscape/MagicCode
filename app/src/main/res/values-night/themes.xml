@@ -18,7 +18,9 @@
         <item name="colorSecondaryContainer">@color/lighter_gray</item>
         <item name="primaryBackgroundColor">@color/dark_gray</item>
         <item name="primaryNoteViewColor">@color/lighter_gray</item>
+        <item name="invertedThemeColor">@color/white</item>
         <item name="primaryRvColor">@color/lighter_gray</item>
+        <item name="editTextBackground">@drawable/edit_text_bg</item>
         <item name="colorSurface">#373737</item>
         <item name="colorOnSurface">@color/white</item>
         <!-- Customize your theme here. -->

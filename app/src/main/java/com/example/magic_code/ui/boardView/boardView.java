@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -106,6 +107,8 @@ public class boardView extends Fragment {
             final Dialog dialog = new Dialog(activity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setContentView(R.layout.dialog_qr_generate);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
             lp.copyFrom(dialog.getWindow().getAttributes());
             lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
@@ -140,6 +143,8 @@ public class boardView extends Fragment {
                         final Dialog dialog1 = new Dialog(activity);
                         dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
                         dialog1.setContentView(R.layout.dialog_qr_code);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
                         WindowManager.LayoutParams lp1 = new WindowManager.LayoutParams();
                         lp1.copyFrom(dialog1.getWindow().getAttributes());
                         lp1.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
@@ -176,6 +181,8 @@ public class boardView extends Fragment {
         board_id = board.getId();
         dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_loading);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
         dialog.setCancelable(false);
         View root_view = inflater.inflate(R.layout.fragment_board_view, container, false);
         ((TextView)dialog.findViewById(R.id.status_text)).setText("Loading board...");
@@ -211,6 +218,8 @@ public class boardView extends Fragment {
                 root_view.findViewById(R.id.create_category_button).setOnClickListener(view -> {
                     Dialog dialog = new Dialog(activity);
                     dialog.setContentView(R.layout.new_category_dialog);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
                     Button confirm_button = dialog.findViewById(R.id.new_category_dialog_create_button);
                     WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
                     lp.copyFrom(dialog.getWindow().getAttributes());

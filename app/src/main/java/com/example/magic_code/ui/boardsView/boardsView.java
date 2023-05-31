@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModelProvider;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -52,6 +54,8 @@ public class boardsView extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_loading);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
         dialog.setCancelable(false);
         ((TextView)dialog.findViewById(R.id.status_text)).setText("Loading boards...");
         dialog.show();
@@ -129,6 +133,8 @@ public class boardsView extends Fragment {
         if (isVisible() && activity!=null) {
             dialog = new Dialog(activity);
             dialog.setContentView(R.layout.dialog_loading);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
             dialog.setCancelable(false);
             ((TextView)dialog.findViewById(R.id.status_text)).setText("Refreshing boards...");
             dialog.show();

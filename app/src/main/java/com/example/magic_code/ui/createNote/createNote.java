@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModelProvider;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -72,6 +74,8 @@ public class createNote extends Fragment {
         EditText note_description = view.findViewById(R.id.rich_text_box);
         Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_loading);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
         dialog.setCancelable(false);
         ((TextView)dialog.findViewById(R.id.status_text)).setText("Creating note...");
         createButton.setEnabled(false);

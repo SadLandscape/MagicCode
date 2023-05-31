@@ -278,6 +278,23 @@ public class API {
             });
             return true;
         }
+        public static boolean updatePermissions(Member member,Boolean readOnly,String authToken,Context ctx){
+            HashMap<String, Object> payload = new HashMap<String,Object>(){{
+                put("set",readOnly);
+            }};
+            Object[] response = makeRequest("/api/boards/"+member.getBoardId()+"/members/"+member.getId()+"/permissions/readOnly","PATCH",payload,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(()-> {
+                    Toast.makeText(ctx, rbody, Toast.LENGTH_SHORT).show();
+                });
+                return false;
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {}.getType());
+            return true;
+        }
+
         public static Board getBoard(String board_id,String authToken, Context ctx){
             Object[] response = makeRequest("/api/boards/"+board_id,"GET",null,authToken);
             boolean status = (boolean) response[0];

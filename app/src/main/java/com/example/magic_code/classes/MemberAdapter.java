@@ -60,6 +60,21 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.UserViewHo
         else{
             holder.readOnlySwitch.setEnabled(true);
             holder.removeUserBtn.setEnabled(true);
+            holder.readOnlySwitch.setOnCheckedChangeListener((btn,value)->{
+                if (!holder.readOnlySwitch.isEnabled()){
+                    return;
+                }
+                holder.readOnlySwitch.setEnabled(false);
+                new Thread(()->{
+                    boolean status = API.Boards.updatePermissions(member,value,authToken,ctx);
+                    ((Activity)ctx).runOnUiThread(()->{
+                        if (!status){
+                            holder.readOnlySwitch.setChecked(!value);
+                        }
+                        holder.readOnlySwitch.setEnabled(true);
+                    });
+                }).start();
+            });
             holder.removeUserBtn.setBackgroundTintList(ColorStateList.valueOf(0xffef5350));
         }
         Log.d("MEMBERS", "onBindViewHolder: "+member.getEmail()+" || "+member.getDeletable()+" || "+position);

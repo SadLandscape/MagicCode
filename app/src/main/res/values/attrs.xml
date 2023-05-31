@@ -3,4 +3,5 @@
     <attr name="primaryBackgroundColor" format="color" />
     <attr name="primaryRvColor" format="color" />
     <attr name="primaryNoteViewColor" format="color"/>
+    <attr name="invertedThemeColor" format="color"/>
 </resources>

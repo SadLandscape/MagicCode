@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -105,6 +107,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
                     if (item.getItemId() == R.id.menu_edit){
                         Dialog dialog = new Dialog(ctx);
                         dialog.setContentView(R.layout.dialog_change_category_title);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
                         EditText newTitleInput = dialog.findViewById(R.id.new_title_et);
                         Button okButton = dialog.findViewById(R.id.change_title_cat_btn);
                         okButton.setEnabled(false);
