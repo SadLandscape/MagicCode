@@ -30,6 +30,8 @@ import com.example.magic_code.models.Invite;
 import com.example.magic_code.ui.boardsView.boardsView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.example.magic_code.databinding.ActivityMainBinding;
+import com.google.android.material.shape.MaterialShapeDrawable;
+
 import android.Manifest;
 import android.widget.Toast;
 
@@ -80,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
                 editor.commit();
             });
             AlertDialog dialog1 = builder.create();
+            dialog1.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog1.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
             dialog1.setCancelable(false);
             dialog1.show();
         }

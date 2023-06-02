@@ -119,10 +119,11 @@ public class boardView extends Fragment {
                 view.setEnabled(false);
                 new Thread(() -> {
                     ShareToken newToken = API.Boards.generateToken(board_id,authToken,readOnly.isChecked(),activity);
-                    if (newToken == null){
-                        return;
-                    }
                     activity.runOnUiThread(() -> {
+                        if (newToken == null){
+                            dialog.dismiss();
+                            return;
+                        }
                         view.setEnabled(true);
                         dialog.dismiss();
                         int size = 500;
@@ -251,14 +252,18 @@ public class boardView extends Fragment {
 
                         }
                     });
-                    confirm_button.setOnClickListener(view12 -> new Thread(() -> {
+                    confirm_button.setOnClickListener(view12 -> {
+                        view12.setEnabled(false);
+                        new Thread(() -> {
                         API.Categories.createCategory(board_id,((EditText)dialog.findViewById(R.id.new_category_dialog_category_title)).getText().toString(),authToken,activity);
                         List<Category> categories = API.Categories.getCategories(board_id,authToken,activity);
                         activity.runOnUiThread(() -> {
+                            view12.setEnabled(true);
                             adapter.updateData(categories);
                             dialog.dismiss();
                         });
-                    }).start());
+                    }).start();
+                    });
                     dialog.findViewById(R.id.new_category_dialog_cancel_button).setOnClickListener(view1 -> dialog.dismiss());
                     dialog.show();
                 });

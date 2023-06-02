@@ -34,12 +34,15 @@ import androidx.navigation.Navigation;
 import com.example.magic_code.MainActivity;
 import com.example.magic_code.R;
 import com.example.magic_code.api.API;
+import com.example.magic_code.api.Websocket;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.ui.noteSettings.NoteSettings;
 import com.example.magic_code.utils.MediaStoreSupport;
 import com.example.magic_code.utils.QrCodeUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -47,6 +50,10 @@ import com.google.zxing.common.BitMatrix;
 
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+
+import java.util.HashMap;
+
+import okhttp3.WebSocket;
 
 public class NoteFragment extends Fragment {
 
@@ -74,6 +81,8 @@ public class NoteFragment extends Fragment {
     private Parser parser;
     private SharedPreferences sharedPreferences;
     private Boolean canEdit;
+    private Websocket websocket;
+    private final Gson gson = new Gson();
     private String authToken;
     private ProgressBar progressBar;
 
@@ -147,6 +156,22 @@ public class NoteFragment extends Fragment {
         parser = Parser.builder().build();
         activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         note_id = getArguments().getString("note_id");
+        new Thread(()->{
+            websocket = new Websocket(note_id,authToken,activity){
+                @Override
+                public void onMessage(@NonNull WebSocket webSocket, @NonNull String text){
+                    toast("Message received! "+text);
+                    activity.runOnUiThread(()->{
+                        HashMap<String, Object> response_data = new Gson().fromJson(text, new TypeToken<HashMap<String, Object>>() {
+                        }.getType());
+                        if (((Double)response_data.get("opcode")).intValue() == 2){
+                            noteDescription.setText(Html.fromHtml(renderer.render(parser.parse((String)response_data.get("new_text")))));
+                        }
+                    });
+                }
+            };
+            websocket.start();
+        }).start();
         View root_view = inflater.inflate(R.layout.noteview, container, false);
         noteDescription = (EditText) root_view.findViewById(R.id.note_text);
         noteDescription.setMovementMethod(LinkMovementMethod.getInstance());
