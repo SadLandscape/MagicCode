@@ -28,6 +28,7 @@ import com.example.magic_code.api.API;
 import com.example.magic_code.models.AuthenticatedUser;
 import com.example.magic_code.models.Invite;
 import com.example.magic_code.ui.boardsView.boardsView;
+import com.example.magic_code.ui.noteView.NoteFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.example.magic_code.databinding.ActivityMainBinding;
 import com.google.android.material.shape.MaterialShapeDrawable;
@@ -124,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 navbar = findViewById(R.id.bottom_navigation);
                 AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                        R.id.boards, R.id.scan, R.id.stories, R.id.profile)
+                        R.id.boards, R.id.scan, R.id.invitations, R.id.profile)
                         .build();
                 navController = Navigation.findNavController(MainActivity.this, R.id.nav_host_fragment_activity_main);
                 NavigationUI.setupActionBarWithNavController(MainActivity.this, navController, appBarConfiguration);
@@ -187,6 +188,18 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Please enable permissions!", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
+        Fragment currentFragment = navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
+        if (currentFragment instanceof NoteFragment) {
+            NoteFragment noteView = (NoteFragment) currentFragment;
+            noteView.backPress();
+        } else {
+            super.onBackPressed();
         }
     }
 

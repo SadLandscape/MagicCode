@@ -1,10 +1,13 @@
 package com.example.magic_code.ui.noteView;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -30,6 +33,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.magic_code.MainActivity;
 import com.example.magic_code.R;
@@ -37,6 +41,7 @@ import com.example.magic_code.api.API;
 import com.example.magic_code.api.Websocket;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Note;
+import com.example.magic_code.ui.boardsView.boardsView;
 import com.example.magic_code.ui.noteSettings.NoteSettings;
 import com.example.magic_code.utils.MediaStoreSupport;
 import com.example.magic_code.utils.QrCodeUtils;
@@ -82,7 +87,6 @@ public class NoteFragment extends Fragment {
     private SharedPreferences sharedPreferences;
     private Boolean canEdit;
     private Websocket websocket;
-    private final Gson gson = new Gson();
     private String authToken;
     private ProgressBar progressBar;
 
@@ -94,14 +98,16 @@ public class NoteFragment extends Fragment {
         inflater.inflate(R.menu.notemenu, menu);
         super.onCreateOptionsMenu(menu,inflater);
     }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.manageOption:
-                NoteSettings fragment = NoteSettings.newInstance(note_id,board);
-                NavController navController = Navigation.findNavController(requireView());
-                navController.navigate(R.id.action_detailed_note_view_to_fragment_note_settings,fragment.getArguments());
+                if (board == null) {
+                    websocket.close();
+                    NoteSettings fragment = NoteSettings.newInstance(note_id, board);
+                    NavController navController = Navigation.findNavController(requireView());
+                    navController.navigate(R.id.action_detailed_note_view_to_fragment_note_settings, fragment.getArguments());
+                }
                 return true;
             case R.id.editOption:
                 isEditing = !isEditing;
@@ -136,6 +142,26 @@ public class NoteFragment extends Fragment {
                 }
                 return true;
             case android.R.id.home:
+                if (isEditing){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    builder.setTitle("Attention");
+                    builder.setMessage("Are you sure you want to discard changes?");
+                    builder.setPositiveButton("Yes", (dialog_, which) -> {
+                        websocket.close();
+                        dialog_.dismiss();
+                        Navigation.findNavController(requireView()).navigateUp();
+                    });
+                    builder.setNegativeButton("No", (dialog_,which)->{
+                        dialog_.dismiss();
+                    });
+                    AlertDialog dialog1 = builder.create();
+                    dialog1.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog1.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
+                    dialog1.setCancelable(false);
+                    dialog1.show();
+                    return true;
+                }
+                websocket.close();
                 Navigation.findNavController(requireView()).navigateUp();
                 return true;
             default:
@@ -164,7 +190,7 @@ public class NoteFragment extends Fragment {
                     activity.runOnUiThread(()->{
                         HashMap<String, Object> response_data = new Gson().fromJson(text, new TypeToken<HashMap<String, Object>>() {
                         }.getType());
-                        if (((Double)response_data.get("opcode")).intValue() == 2){
+                        if (((Double)response_data.get("opcode")).intValue() == 4){
                             noteDescription.setText(Html.fromHtml(renderer.render(parser.parse((String)response_data.get("new_text")))));
                         }
                     });
@@ -214,4 +240,11 @@ public class NoteFragment extends Fragment {
         super.onAttach(context);
         this.activity = (FragmentActivity) context;
     }
+    public void backPress(){
+        new Thread(()->{
+            websocket.close();
+        });
+        Navigation.findNavController(requireView()).navigateUp();
+    }
+
 }

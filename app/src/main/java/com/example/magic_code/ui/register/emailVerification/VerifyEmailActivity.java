@@ -9,6 +9,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.Editable;
@@ -127,6 +129,8 @@ public class VerifyEmailActivity extends AppCompatActivity {
             });
             builder.setNegativeButton("No", null);
             AlertDialog dialog = builder.create();
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
             dialog.show();
         });
         EditText lastEdit = editTexts.get(5);
@@ -244,6 +248,8 @@ public class VerifyEmailActivity extends AppCompatActivity {
             });
             builder.setNegativeButton("No", null);
             AlertDialog dialog = builder.create();
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
             dialog.setOnDismissListener(dialogInterface -> {
                 isAlertDialogShowing = true;
             });

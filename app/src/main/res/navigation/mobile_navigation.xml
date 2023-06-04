@@ -24,9 +24,9 @@
         android:name="com.example.magic_code.ui.manageBoard.manageBoard"
         android:id="@+id/manageBoard" />
     <fragment
-        android:label="Stories"
-        android:name="com.example.magic_code.ui.stories.StoriesPage"
-        android:id="@+id/stories" />
+        android:label="Invites"
+        android:name="com.example.magic_code.ui.invites.InvitesPage"
+        android:id="@+id/invitations" />
     <fragment
         android:label="Profile"
         android:name="com.example.magic_code.ui.profile.ProfilePage"

@@ -21,6 +21,7 @@ public class Websocket extends WebSocketListener {
     private final String noteId;
     private final String authToken;
     private final Context ctx;
+    private WebSocket websocket;
     private final Gson gson = new Gson();
 
     public void toast(String message){
@@ -33,27 +34,29 @@ public class Websocket extends WebSocketListener {
     }
 
     public void start() {
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(API.API_URL+"/ws")
-                .build();
-        client.newWebSocket(request, this);
+        new Thread(()->{
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(API.API_URL+"/ws")
+                    .build();
+            websocket = client.newWebSocket(request, this);
+        }).start();
+    }
+    public void close(){
+        websocket.close(1000,"Member has left the note view");
     }
 
     @Override
     public void onOpen(WebSocket webSocket, @NonNull Response response) {
-        toast("Websocket connection opened!");
-        HashMap<String,Object> payload = new HashMap<String,Object>();
+        HashMap<String,Object> payload = new HashMap<>();
         payload.put("opcode",2);
         payload.put("authToken",authToken);
         payload.put("noteId",noteId);
         webSocket.send(gson.toJson(payload));
-        toast("Message sent "+gson.toJson(payload));
     }
 
     @Override
     public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
-        toast("Message received: "+text);
     }
 
     @Override
@@ -61,15 +64,16 @@ public class Websocket extends WebSocketListener {
 
     @Override
     public void onClosing(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-        toast("Error1 "+reason);
+        if (code != 1000){
+            start();
+        }
     }
     @Override
-    public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-        toast("Error2 "+reason);
-    }
+    public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {}
 
     @Override
     public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) {
-        toast("Error3 "+t);
+        new Thread(this::start).start();
+
     }
 }

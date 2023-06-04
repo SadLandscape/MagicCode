@@ -89,6 +89,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
                         }).start());
                         builder.setNegativeButton("Cancel", null);
                         AlertDialog dialog = builder.create();
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
                         dialog.show();
                         return true;
                     }

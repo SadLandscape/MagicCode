@@ -22,8 +22,6 @@ import com.example.magic_code.R;
 import com.example.magic_code.api.API;
 import com.example.magic_code.models.Note;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {

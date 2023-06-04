@@ -94,6 +94,10 @@ public class NoteSettings extends Fragment {
         });
         new Thread(()-> {
             note = API.Notes.getNote(note_id,authToken,activity);
+            if (note == null){
+                Navigation.findNavController(requireView()).navigateUp();
+                return;
+            }
             List<Category> categories = API.Categories.getCategories(board.getId(),authToken,activity);
             selectedCategory = note.getCategory();
             activity.runOnUiThread(() -> {

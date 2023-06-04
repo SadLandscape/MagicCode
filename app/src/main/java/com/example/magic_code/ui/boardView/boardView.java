@@ -144,8 +144,8 @@ public class boardView extends Fragment {
                         final Dialog dialog1 = new Dialog(activity);
                         dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
                         dialog1.setContentView(R.layout.dialog_qr_code);
-                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
+                        dialog1.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog1.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
                         WindowManager.LayoutParams lp1 = new WindowManager.LayoutParams();
                         lp1.copyFrom(dialog1.getWindow().getAttributes());
                         lp1.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5);
@@ -194,6 +194,10 @@ public class boardView extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         new Thread(()->{
             board = API.Boards.getBoard(board_id,authToken,activity);
+            if (board == null){
+                dialog.dismiss();
+                return;
+            }
             activity.runOnUiThread(()->{
                 ((MainActivity) activity).setActionBarTitle(board.getTitle());
                 new Thread(() -> {

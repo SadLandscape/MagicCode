@@ -43,7 +43,7 @@ public class API {
             conn.setConnectTimeout(10000);
             conn.setReadTimeout(10000);
             conn.setRequestMethod(method.toUpperCase());
-            if (method.toUpperCase().equals("POST") || method.toUpperCase().equals("PATCH")) {
+            if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PATCH")) {
                 conn.setRequestProperty("Content-Type", "application/json");
             }
             conn.setRequestProperty("Accept", "application/json");

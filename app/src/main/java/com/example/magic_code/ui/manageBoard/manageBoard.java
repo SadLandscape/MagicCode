@@ -158,7 +158,9 @@ public class manageBoard extends Fragment {
         new Thread(()->{
             Board board = API.Boards.getBoard(board_id,authToken,activity);
             activity.runOnUiThread(()->{
-                titleBoard.setText(board.getTitle());
+                if (board !=null) {
+                    titleBoard.setText(board.getTitle());
+                }
             });
 
         }).start();

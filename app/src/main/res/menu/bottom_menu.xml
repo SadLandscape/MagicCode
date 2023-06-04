@@ -10,10 +10,10 @@
         android:icon="@drawable/scanner_24"
         android:title="Scan" />
     <item
-        android:id="@+id/stories"
+        android:id="@+id/invitations"
         android:enabled="true"
-        android:icon="@drawable/book_24"
-        android:title="Stories" />
+        android:icon="@drawable/baseline_mail_outline_24"
+        android:title="Invites" />
     <item
         android:id="@+id/profile"
         android:enabled="true"

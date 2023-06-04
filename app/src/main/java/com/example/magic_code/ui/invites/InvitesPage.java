@@ -1,4 +1,4 @@
-package com.example.magic_code.ui.stories;
+package com.example.magic_code.ui.invites;
 
 import androidx.lifecycle.ViewModelProvider;
 
@@ -14,24 +14,24 @@ import android.view.ViewGroup;
 
 import com.example.magic_code.R;
 
-public class StoriesPage extends Fragment {
+public class InvitesPage extends Fragment {
 
-    private StoriesPageViewModel mViewModel;
+    private InvitesPageViewModel mViewModel;
 
-    public static StoriesPage newInstance() {
-        return new StoriesPage();
+    public static InvitesPage newInstance() {
+        return new InvitesPage();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.stories, container, false);
+        return inflater.inflate(R.layout.invites, container, false);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(StoriesPageViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(InvitesPageViewModel.class);
         // TODO: Use the ViewModel
     }
 
