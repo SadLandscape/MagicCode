@@ -50,7 +50,8 @@ public class QueryAdapter extends RecyclerView.Adapter<QueryAdapter.UserViewHold
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = users.get(position);
-        holder.userNameTextView.setText(user.getDisplayName());
+        holder.userNameTextView.setText("@"+user.getUsername());
+        holder.userDisplayNameTextView.setText(user.getDisplayName());
         holder.userEmailTextView.setText(user.getEmail());
         holder.sendBtn.setOnClickListener(v->{
             v.setEnabled(false);
@@ -73,11 +74,13 @@ public class QueryAdapter extends RecyclerView.Adapter<QueryAdapter.UserViewHold
     public class UserViewHolder extends RecyclerView.ViewHolder {
         public TextView userNameTextView;
         public TextView userEmailTextView;
+        public TextView userDisplayNameTextView;
         public Button sendBtn;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            userNameTextView = itemView.findViewById(R.id.query_username);
+            userNameTextView = itemView.findViewById(R.id.query_username_textview);
+            userDisplayNameTextView = itemView.findViewById(R.id.query_displayname_textview);
             userEmailTextView = itemView.findViewById(R.id.query_email_textview);
             sendBtn = itemView.findViewById(R.id.invite_button);
         }

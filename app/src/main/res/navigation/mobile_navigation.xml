@@ -36,16 +36,27 @@
             app:destination="@id/profile_settings" />
     </fragment>
     <fragment
+        android:label="History"
+        android:name="com.example.magic_code.ui.historyView.HistoryView"
+        android:id="@+id/history_view" />
+    <fragment
         android:name="com.example.magic_code.ui.noteView.NoteFragment"
         android:id="@+id/detailed_note_view" >
         <action
             android:id="@+id/action_detailed_note_view_to_fragment_note_settings"
             app:destination="@id/fragment_note_settings" />
+        <action
+            android:id="@+id/action_detailed_note_view_to_history_view"
+            app:destination="@id/history_view" />
     </fragment>
     <fragment
         android:label="Note Settings"
         android:name="com.example.magic_code.ui.noteSettings.NoteSettings"
-        android:id="@+id/fragment_note_settings" />
+        android:id="@+id/fragment_note_settings" >
+        <action
+            android:id="@+id/action_fragment_note_settings_self"
+            app:destination="@id/fragment_note_settings" />
+    </fragment>
     <fragment
         android:label="Profile Settings"
         android:name="com.example.magic_code.ui.profileSettings.ProfileSettings"

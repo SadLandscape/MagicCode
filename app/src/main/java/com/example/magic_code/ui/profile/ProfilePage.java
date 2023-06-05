@@ -26,6 +26,8 @@ import com.example.magic_code.api.API;
 import com.example.magic_code.models.AuthenticatedUser;
 import com.example.magic_code.ui.profileSettings.ProfileSettings;
 
+import java.util.HashSet;
+
 public class ProfilePage extends Fragment {
 
     private ProfilePageViewModel mViewModel;
@@ -56,6 +58,7 @@ public class ProfilePage extends Fragment {
                 view.findViewById(R.id.button_logout).setOnClickListener(view1 -> {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("authToken","");
+                    editor.putStringSet("invites",new HashSet<>());
                     editor.apply();
                     Intent intent = new Intent(activity, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -1,11 +1,8 @@
 package com.example.magic_code.ui.noteView;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -18,13 +15,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,17 +35,11 @@ import com.example.magic_code.api.API;
 import com.example.magic_code.api.Websocket;
 import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Note;
-import com.example.magic_code.ui.boardsView.boardsView;
+import com.example.magic_code.ui.historyView.HistoryView;
 import com.example.magic_code.ui.noteSettings.NoteSettings;
-import com.example.magic_code.utils.MediaStoreSupport;
-import com.example.magic_code.utils.QrCodeUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
 
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -103,11 +91,12 @@ public class NoteFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.manageOption:
                 if (board == null) {
-                    websocket.close();
-                    NoteSettings fragment = NoteSettings.newInstance(note_id, board);
-                    NavController navController = Navigation.findNavController(requireView());
-                    navController.navigate(R.id.action_detailed_note_view_to_fragment_note_settings, fragment.getArguments());
+                    return true;
                 }
+                websocket.close();
+                NoteSettings fragment = NoteSettings.newInstance(note_id, board);
+                NavController navController = Navigation.findNavController(requireView());
+                navController.navigate(R.id.action_detailed_note_view_to_fragment_note_settings, fragment.getArguments());
                 return true;
             case R.id.editOption:
                 isEditing = !isEditing;
@@ -122,17 +111,14 @@ public class NoteFragment extends Fragment {
                     item.setIcon(R.drawable.baseline_edit_24);
                     noteText = noteDescription.getText().toString();
                     progressBar.setVisibility(View.VISIBLE);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            API.Notes.setBody(note_id,noteText,authToken,activity);
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setVisibility(View.GONE);
-                                }
-                            });
-                        }
+                    new Thread(() -> {
+                        API.Notes.setBody(note_id,noteText,authToken,activity);
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        });
                     }).start();
                     noteDescription.setText(Html.fromHtml(renderer.render(parser.parse(noteText))));
                     noteDescription.setFocusable(false);
@@ -151,9 +137,7 @@ public class NoteFragment extends Fragment {
                         dialog_.dismiss();
                         Navigation.findNavController(requireView()).navigateUp();
                     });
-                    builder.setNegativeButton("No", (dialog_,which)->{
-                        dialog_.dismiss();
-                    });
+                    builder.setNegativeButton("No", (dialog_,which)-> dialog_.dismiss());
                     AlertDialog dialog1 = builder.create();
                     dialog1.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     dialog1.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
@@ -164,6 +148,12 @@ public class NoteFragment extends Fragment {
                 websocket.close();
                 Navigation.findNavController(requireView()).navigateUp();
                 return true;
+            case R.id.historyOption:
+                websocket.close();
+                HistoryView historyFragment = HistoryView.newInstance(note_id);
+                NavController historyNavController = Navigation.findNavController(requireView());
+                historyNavController.navigate(R.id.action_detailed_note_view_to_history_view, historyFragment.getArguments());
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -173,9 +163,10 @@ public class NoteFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        assert getArguments() != null;
         canEdit = getArguments().getBoolean("canEdit");
         board = (Board) getArguments().getSerializable("board");
-        sharedPreferences = activity.getSharedPreferences("MagicPrefs", activity.MODE_PRIVATE);
+        sharedPreferences = activity.getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         authToken = sharedPreferences.getString("authToken","");
         imm = ContextCompat.getSystemService(activity, InputMethodManager.class);
         renderer = HtmlRenderer.builder().build();
@@ -186,7 +177,6 @@ public class NoteFragment extends Fragment {
             websocket = new Websocket(note_id,authToken,activity){
                 @Override
                 public void onMessage(@NonNull WebSocket webSocket, @NonNull String text){
-                    toast("Message received! "+text);
                     activity.runOnUiThread(()->{
                         HashMap<String, Object> response_data = new Gson().fromJson(text, new TypeToken<HashMap<String, Object>>() {
                         }.getType());
@@ -241,9 +231,7 @@ public class NoteFragment extends Fragment {
         this.activity = (FragmentActivity) context;
     }
     public void backPress(){
-        new Thread(()->{
-            websocket.close();
-        });
+        new Thread(()-> websocket.close());
         Navigation.findNavController(requireView()).navigateUp();
     }
 

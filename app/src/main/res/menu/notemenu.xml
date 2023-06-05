@@ -6,6 +6,11 @@
         android:title="Share"
         app:showAsAction="always" />
     <item
+        android:id="@+id/historyOption"
+        android:title="History"
+        android:icon="@drawable/baseline_history_24"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/manageOption"
         android:title="Manage"
         android:icon="@drawable/baseline_settings_24"

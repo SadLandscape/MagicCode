@@ -23,13 +23,24 @@
             android:layout_weight="1">
 
             <TextView
-                android:id="@+id/query_username"
+                android:id="@+id/query_displayname_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="?android:textColorPrimary"
-                android:text="Username"
+                android:text="Display Name"
                 android:textSize="16sp"
                 android:textStyle="bold" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/query_username_textview"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="\@username"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="10sp" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/query_email_textview"
@@ -40,7 +51,7 @@
                 android:maxLines="1"
                 android:text="email"
                 android:textColor="?android:textColorPrimary"
-                android:textSize="12sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <Button

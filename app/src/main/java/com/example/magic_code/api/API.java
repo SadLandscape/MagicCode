@@ -10,6 +10,7 @@ import com.example.magic_code.models.Board;
 import com.example.magic_code.models.Category;
 import com.example.magic_code.models.Invite;
 import com.example.magic_code.models.Member;
+import com.example.magic_code.models.Modification;
 import com.example.magic_code.models.Note;
 import com.example.magic_code.models.ShareToken;
 import com.example.magic_code.models.User;
@@ -671,6 +672,25 @@ public class API {
     }
 
     public static class Notes {
+
+        public static List<Modification> getHistory(String note_id,String authToken,Context ctx){
+            Object[] response = makeRequest("/api/notes/"+note_id+"/history","GET",null,authToken);
+            boolean status = (boolean) response[0];
+            String rbody = (String) response[1];
+            if (!status) {
+                ((Activity) ctx).runOnUiThread(() -> Toast.makeText(ctx, (String) rbody, Toast.LENGTH_SHORT).show());
+                return new ArrayList<>();
+            }
+            HashMap<String, Object> response_data = new Gson().fromJson(rbody, new TypeToken<HashMap<String, Object>>() {
+            }.getType());
+            List<Modification> modifications = new ArrayList<>();
+            List<LinkedTreeMap<String,Object>> mods = (List<LinkedTreeMap<String, Object>>) response_data.get("data");
+            for (LinkedTreeMap<String,Object> mod: mods) {
+                HashMap<String,Object> mod_ = new HashMap<>(mod);
+                modifications.add(new Modification(mod_));
+            }
+            return modifications;
+        }
 
         public static boolean updateNote(String note_id,String title, Category category,String authToken, Context ctx){
             HashMap<String,Object> payload = new HashMap<String,Object>(){{

@@ -52,7 +52,6 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.UserViewHo
         holder.userEmailTextView.setText(member.getEmail());
         holder.readOnlySwitch.setChecked(!member.getCanEdit());
         if (!member.getDeletable()) {
-            Log.d("MEMBERS", member.getEmail()+" || "+position);
             holder.readOnlySwitch.setEnabled(false);
             holder.removeUserBtn.setEnabled(false);
             holder.removeUserBtn.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
