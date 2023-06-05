@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.invite_dialog_bg);
         dialog.setCancelable(false);
         dialog.show();
-        String pendingInvite = sharedPreferences.getString("pendingInvite", "");
         actionBar = getSupportActionBar();
         new Thread(() -> {
             if (!API.Authentication.checkAuth(authToken, MainActivity.this)[1]) {
@@ -101,10 +100,47 @@ public class MainActivity extends AppCompatActivity {
             }
             currentUser = API.Authentication.getUser(authToken, MainActivity.this);
             dialog.dismiss();
-
+            if (data !=null) {
+                Uri uri = data.getData();
+                if (uri != null && Intent.ACTION_VIEW.equals(data.getAction())) {
+                    List<String> parameters = uri.getPathSegments();
+                    if (parameters == null) {
+                        return;
+                    }
+                    if (parameters.size() < 2) {
+                        return;
+                    }
+                    String location = parameters.get(parameters.size() - 2);
+                    String inviteId = parameters.get(parameters.size() - 1);
+                    if (inviteId.equals("")) {
+                        return;
+                    }
+                    if (location.equals("invites")) {
+                        new Thread(() -> {
+                            Invite invite = API.Invites.validateInvite(inviteId, this);
+                            if (invite == null){
+                                editor.putString("pendingInvite","");
+                                editor.commit();
+                                return;
+                            }
+                            if (!pendingInvites.contains(inviteId)) {
+                                Set<String> invites_ = new HashSet<>(pendingInvites);
+                                invites_.add(inviteId);
+                                editor.putStringSet("invites", invites_);
+                                editor.commit();
+                                runOnUiThread(()->{
+                                    showInviteDialog(invite);
+                                    updateBadge();
+                                });
+                            }
+                        }).start();
+                    }
+                }
+            }
             runOnUiThread(() -> {
                 binding = ActivityMainBinding.inflate(getLayoutInflater());
                 setContentView(binding.getRoot());
+                String pendingInvite = sharedPreferences.getString("pendingInvite", "");
                 if (!pendingInvite.equals("")) {
                     new Thread(() -> {
                         Invite invite = API.Invites.validateInvite(pendingInvite, this);
@@ -121,10 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 NavigationUI.setupActionBarWithNavController(MainActivity.this, navController, appBarConfiguration);
                 NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
                 BadgeDrawable badge = navbar.getOrCreateBadge(R.id.invitations);
-                if (pendingInvites.size() != 0) {badge.setNumber(pendingInvites.size());} else {badge.setVisible(false);}
-                if (data !=null && data.getData() != null){
-                    onNewIntent(data);
-                }
+                if (pendingInvites.size() != 0) {badge.setNumber(pendingInvites.size()); badge.setVisible(true);} else {badge.setVisible(false);}
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 }
