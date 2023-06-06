@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
     public void initApp(@Nullable Intent data){
         sharedPreferences = getSharedPreferences("MagicPrefs", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
-        pendingInvites = sharedPreferences.getStringSet("invites",new HashSet<>());
         authToken = sharedPreferences.getString("authToken", "");
         Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog_loading);
@@ -91,6 +90,41 @@ public class MainActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.show();
         actionBar = getSupportActionBar();
+        pendingInvites = sharedPreferences.getStringSet("invites",new HashSet<>());
+        if (data !=null) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                List<String> parameters = uri.getPathSegments();
+                if (parameters == null) {
+                    return;
+                }
+                if (parameters.size() < 2) {
+                    return;
+                }
+                String location = parameters.get(parameters.size() - 2);
+                String inviteId = parameters.get(parameters.size() - 1);
+                if (inviteId.equals("")) {
+                    return;
+                }
+                if (location.equals("invites")) {
+                    new Thread(() -> {
+                        Invite invite = API.Invites.validateInvite(inviteId, this);
+                        if (invite == null){
+                            editor.putString("pendingInvite","");
+                            editor.commit();
+                            return;
+                        }
+                        if (!pendingInvites.contains(inviteId)) {
+                            Set<String> invites_ = new HashSet<>(pendingInvites);
+                            invites_.add(inviteId);
+                            editor.putStringSet("invites", invites_);
+                            editor.putString("pendingInvite",inviteId);
+                            editor.commit();
+                        }
+                    }).start();
+                }
+            }
+        }
         new Thread(() -> {
             if (!API.Authentication.checkAuth(authToken, MainActivity.this)[1]) {
                 Intent intent = new Intent(MainActivity.this, AuthenticationActivity.class);
@@ -100,43 +134,7 @@ public class MainActivity extends AppCompatActivity {
             }
             currentUser = API.Authentication.getUser(authToken, MainActivity.this);
             dialog.dismiss();
-            if (data !=null) {
-                Uri uri = data.getData();
-                if (uri != null && Intent.ACTION_VIEW.equals(data.getAction())) {
-                    List<String> parameters = uri.getPathSegments();
-                    if (parameters == null) {
-                        return;
-                    }
-                    if (parameters.size() < 2) {
-                        return;
-                    }
-                    String location = parameters.get(parameters.size() - 2);
-                    String inviteId = parameters.get(parameters.size() - 1);
-                    if (inviteId.equals("")) {
-                        return;
-                    }
-                    if (location.equals("invites")) {
-                        new Thread(() -> {
-                            Invite invite = API.Invites.validateInvite(inviteId, this);
-                            if (invite == null){
-                                editor.putString("pendingInvite","");
-                                editor.commit();
-                                return;
-                            }
-                            if (!pendingInvites.contains(inviteId)) {
-                                Set<String> invites_ = new HashSet<>(pendingInvites);
-                                invites_.add(inviteId);
-                                editor.putStringSet("invites", invites_);
-                                editor.commit();
-                                runOnUiThread(()->{
-                                    showInviteDialog(invite);
-                                    updateBadge();
-                                });
-                            }
-                        }).start();
-                    }
-                }
-            }
+            pendingInvites = sharedPreferences.getStringSet("invites",new HashSet<>());
             runOnUiThread(() -> {
                 binding = ActivityMainBinding.inflate(getLayoutInflater());
                 setContentView(binding.getRoot());
